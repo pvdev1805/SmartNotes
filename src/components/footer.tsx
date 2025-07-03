@@ -74,7 +74,7 @@ const Footer = () => {
 
   return (
     <footer className='bg-background border-t border-border mt-auto'>
-      <div className='max-w-7xl mx-auto px-6 py-8'>
+      <div className='max-w-7xl mx-auto px-4 py-4'>
         {/* Main Footer Content */}
         <div className='flex flex-col md:flex-row justify-between items-center gap-6'>
           {/* Logo and Description */}
@@ -154,7 +154,7 @@ const Footer = () => {
         </div>
 
         {/* Divider */}
-        <div className='border-t border-border my-6'></div>
+        <div className='border-t border-border my-4'></div>
 
         {/* Bottom Footer */}
         <div className='flex flex-col sm:flex-row justify-between items-center gap-4'>
