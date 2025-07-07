@@ -54,7 +54,8 @@ const recentNotes = [
     id: 2,
     title: 'Next.js for Beginners',
     createdAt: new Date('2025-07-01'),
-    description: 'An introductory guide to Next.js, the React framework for production',
+    description:
+      'An introductory guide to Next.js, the React framework for production. Learn how to build server-rendered React applications with ease.',
     tags: ['NextJS', 'ReactJS']
   },
   {
@@ -99,7 +100,7 @@ const Home = () => {
     <>
       <div className='py-2 space-y-8'>
         {/* Header Section */}
-        <section className='mb-4 flex sm:items-center sm:justify-between gap-4'>
+        <section className='mb-4 flex items-center justify-between gap-4'>
           <div>
             <h1 className='text-xl md:text-2xl lg:text-3xl font-bold text-foreground flex items-center gap-2'>
               Welcome back!
@@ -156,7 +157,9 @@ const Home = () => {
               >
                 <CardContent>
                   <div className='flex items-start justify-between'>
-                    <h3 className='font-semibold text-foreground line-clamp-1'>{note.title}</h3>
+                    <h3 className='font-semibold text-foreground truncate max-w-[200px] sm:max-w-[220px]'>
+                      {note.title}
+                    </h3>
                     <div className='flex items-center'>
                       <Button variant={'ghost'} className=''>
                         <Edit className='w-4 h-4 text-muted-foreground' />
@@ -207,7 +210,12 @@ const Home = () => {
                       <FileText className='w-6 h-6' />
                     </div>
                     <div>
-                      <p className='font-semibold text-foreground'>{pdf.fileName}</p>
+                      <p
+                        className='font-semibold text-foreground truncate max-w-[140px] sm:max-w-[160px]'
+                        title={pdf.fileName}
+                      >
+                        {pdf.fileName}
+                      </p>
                       <p className='text-sm text-muted-foreground'>{pdf.size}</p>
                     </div>
                   </div>
