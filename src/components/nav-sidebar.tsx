@@ -42,7 +42,7 @@ const NavSidebar = () => {
   const pathname = usePathname()
 
   return (
-    <aside className='w-64 h-full bg-sidebar border-r border-sidebar-border flex flex-col'>
+    <aside className='hidden lg:flex w-64 h-full bg-sidebar border-r border-sidebar-border flex-col'>
       <nav className='flex flex-col p-4 space-y-1'>
         {navItems.map((item) => {
           const isActive = pathname === item.href

@@ -76,7 +76,7 @@ const Footer = () => {
     <footer className='bg-background border-t border-border mt-auto'>
       <div className='max-w-7xl mx-auto px-4 py-4'>
         {/* Main Footer Content */}
-        <div className='flex flex-col md:flex-row justify-between items-center gap-6'>
+        <div className='flex flex-col sm:flex-row justify-between items-center gap-4 lg:gap-6'>
           {/* Logo and Description */}
           <div className='flex flex-col items-center md:items-start space-y-2'>
             {/* Logo */}
@@ -98,7 +98,7 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div className='flex flex-col sm:flex-row gap-8'>
+          <div className='hidden sm:flex flex-row gap-8'>
             {/* Features */}
             <div className='flex flex-col space-y-3'>
               <h4 className='text-sm font-medium text-foreground'>Features</h4>
