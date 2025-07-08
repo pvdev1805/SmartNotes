@@ -36,6 +36,7 @@ const LoginForm = () => {
     try {
       // Simulate API call for login
       await new Promise((resolve) => setTimeout(resolve, 2000))
+
       router.push('/')
     } catch (error) {
       console.error('Login failed:', error)
