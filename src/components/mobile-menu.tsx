@@ -103,7 +103,7 @@ const MobileMenu = () => {
         <div className='flex flex-col h-full'>
           {/* User Profile Section */}
           <div className='flex flex-col items-center p-4 border-b border-gray-200 dark:border-gray-700'>
-            <div className='p-4 border-b dark:border-gray-700'>
+            <div className='p-4 border-b dark:border-gray-700 w-full'>
               <div className='flex items-center gap-3 mb-3'>
                 <Avatar className='w-12 h-12'>
                   <AvatarImage src='/avatar.svg' alt='John Smith' />
