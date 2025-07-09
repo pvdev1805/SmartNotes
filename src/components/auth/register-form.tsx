@@ -33,6 +33,10 @@ const RegisterForm = () => {
     setShowPassword(!showPassword)
   }
 
+  const handleShowConfirmPassword = () => {
+    setShowConfirmPassword(!showConfirmPassword)
+  }
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setIsLoading(true)
@@ -46,6 +50,7 @@ const RegisterForm = () => {
       console.error('Registration failed:', error)
     } finally {
       setIsLoading(false)
+      setFormData({ fullName: '', email: '', password: '', confirmPassword: '' }) // Reset form after submission
     }
   }
 
@@ -72,7 +77,7 @@ const RegisterForm = () => {
           </div>
 
           {/* Register Form */}
-          <form className='space-y-4'>
+          <form onSubmit={handleSubmit} className='space-y-4'>
             {/* Full Name Field */}
             <div className='space-y-2 flex flex-col'>
               <label htmlFor='fullName' className='ml-1 mb-1 text-sm font-medium text-gray-700 dark:text-gray-300'>
@@ -151,7 +156,7 @@ const RegisterForm = () => {
               </label>
               <div className='relative'>
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showConfirmPassword ? 'text' : 'password'}
                   name='confirmPassword'
                   id='confirmPassword'
                   value={formData.confirmPassword}
@@ -164,9 +169,9 @@ const RegisterForm = () => {
                 <button
                   type='button'
                   className='absolute inset-y-0 right-0 pr-4 flex items-center'
-                  onClick={handleShowPassword}
+                  onClick={handleShowConfirmPassword}
                 >
-                  {showPassword ? (
+                  {showConfirmPassword ? (
                     <EyeOff className='w-5 h-5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors' />
                   ) : (
                     <Eye className='w-5 h-5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors' />
@@ -190,7 +195,10 @@ const RegisterForm = () => {
             <div className='text-center'>
               <p className='text-sm text-gray-600 dark:text-gray-400'>
                 Already have an account?
-                <Link href='/login' className='ml-2 text-blue-600 hover:underline dark:text-blue-400'>
+                <Link
+                  href='/login'
+                  className='ml-2 text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 font-medium'
+                >
                   Sign In
                 </Link>
               </p>
