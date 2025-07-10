@@ -85,7 +85,7 @@ const Footer = () => {
                 <img src={companyInfo.logo} alt={`${companyInfo.name} Logo`} className='w-4 h-4' />
               </div>
               <span className='text-lg font-bold text-foreground'>
-                Smart<span className='text-blue-600'>Notes</span>
+                Smart<span className='text-blue-600 dark:text-blue-400'>Notes</span>
               </span>
             </div>
             {/* End - Logo */}

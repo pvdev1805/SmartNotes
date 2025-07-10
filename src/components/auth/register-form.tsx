@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import Logo from '@/components/logo'
 import { Eye, EyeOff } from 'lucide-react'
 import { ChangeEvent, FormEvent, useState } from 'react'
 import Link from 'next/link'
@@ -60,16 +61,7 @@ const RegisterForm = () => {
         <CardContent className='p-8'>
           <div className='flex flex-col items-center mb-4'>
             {/* Logo */}
-            <div className='flex items-center gap-2 px-4 md:px-6 lg:px-8 py-3 select-none'>
-              <img
-                src='/logo.svg'
-                alt='SmartNotes Logo'
-                className='w-8 h-8 rounded shadow-sm bg-gradient-to-tr from-blue-500 to-purple-500 p-1'
-              />
-              <span className='text-2xl font-bold text-gray-800 dark:text-white tracking-tight drop-shadow-sm'>
-                Smart<span className='text-blue-600 dark:text-blue-400'>Notes</span>
-              </span>
-            </div>
+            <Logo />
             {/* End - Logo */}
 
             <h1 className='text-2xl font-bold text-gray-900 mb-2'>Create an Account</h1>
