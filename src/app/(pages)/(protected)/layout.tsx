@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'A smart note-taking application for better learning'
 }
 
-const DashboardLayout = ({
+const ProtectedLayout = ({
   children
 }: Readonly<{
   children: React.ReactNode
@@ -30,4 +30,4 @@ const DashboardLayout = ({
   )
 }
 
-export default DashboardLayout
+export default ProtectedLayout
