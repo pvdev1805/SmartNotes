@@ -1,4 +1,5 @@
 import AnimatedSection from '@/components/landing/animated-section'
+import NoteCard from '@/components/notes/note-card'
 import TimeAgo from '@/components/time-ago'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -155,43 +156,16 @@ const Home = () => {
               </Link>
             </div>
 
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
               {recentNotes.map((note) => (
-                <Card
+                <NoteCard
                   key={note.id}
-                  className='border shadow-sm hover:shadow-lg transition-shadow duration-300 rounded-lg'
-                >
-                  <CardContent>
-                    <div className='flex items-start justify-between'>
-                      <h3 className='font-semibold text-foreground truncate max-w-[200px] sm:max-w-[220px]'>
-                        {note.title}
-                      </h3>
-                      <div className='flex items-center'>
-                        <Button variant={'ghost'} className=''>
-                          <Edit className='w-4 h-4 text-muted-foreground' />
-                        </Button>
-                        <Button variant={'ghost'} className=''>
-                          <Trash className='w-4 h-4 text-red-600' />
-                        </Button>
-                      </div>
-                    </div>
-
-                    <TimeAgo date={note.createdAt} className='mb-3' />
-
-                    <p className='mb-4 text-sm text-muted-foreground lg:min-h-10 line-clamp-2'>{note.description}</p>
-
-                    <div className='flex items-center gap-2'>
-                      <Tag className='w-4 h-4 text-muted-foreground' />
-                      <div className='flex gap-2'>
-                        {note.tags.map((tag) => (
-                          <Badge key={tag} variant={'secondary'} className='text-xs'>
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                  id={note.id}
+                  title={note.title}
+                  description={note.description}
+                  createdAt={note.createdAt}
+                  tags={note.tags}
+                />
               ))}
             </div>
           </section>
