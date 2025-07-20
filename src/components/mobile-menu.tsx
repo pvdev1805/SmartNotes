@@ -10,7 +10,7 @@ import Link from 'next/link'
 const navLinks = [
   {
     title: 'Home',
-    href: '/',
+    href: '/home',
     icon: Home
   },
   {
