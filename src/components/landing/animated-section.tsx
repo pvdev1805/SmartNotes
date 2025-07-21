@@ -11,10 +11,10 @@ const AnimatedSection = ({ children, delay = 0, className = '' }: AnimatedSectio
   return (
     <>
       <motion.section
-        initial={{ opacity: 0, y: 60 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 0.7, delay, ease: 'easeOut' }}
+        transition={{ duration: 0.3, delay, ease: 'easeOut' }}
         className={className}
       >
         {children}

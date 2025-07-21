@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button'
 import { Edit, Trash, Tag, MoreVertical } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import TimeAgo from '@/components/time-ago'
-import { useEffect, useRef, useState } from 'react'
-
+import { MouseEvent, useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
+// import { useRouter } from 'next/navigation'
 interface NoteCardProps {
   id: number
   title: string
@@ -19,7 +20,7 @@ const NoteCard = ({ id, title, description, createdAt, tags }: NoteCardProps) =>
   const menuRef = useRef<HTMLDivElement>(null)
   const cancelButtonRef = useRef<HTMLButtonElement>(null)
 
-  const handleClickOutside = (event: MouseEvent) => {
+  const handleClickOutside = (event: MouseEvent | globalThis.MouseEvent) => {
     if (
       menuRef.current &&
       !menuRef.current.contains(event.target as Node) &&
@@ -31,51 +32,75 @@ const NoteCard = ({ id, title, description, createdAt, tags }: NoteCardProps) =>
     }
   }
 
-  const handleActionsToggle = () => {
+  const handleActionsToggle = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
     setActionsOpen((prev) => !prev)
+  }
+
+  const handleEdit = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    setActionsOpen(false)
+    // Logic to handle edit action, e.g., redirect to edit page
+    // useRouter().push(`/notes/${id}/edit`)
+    console.log('Edit action triggered for note:', id)
+  }
+
+  const handleDelete = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    setActionsOpen(false)
+    // Logic to handle delete action, e.g., show confirmation dialog
+    // useRouter().push(`/notes/${id}/delete`)
+    console.log('Delete action triggered for note:', id)
+  }
+
+  const handleCancel = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    setActionsOpen(false)
   }
 
   // Close actions menu when clicking outside
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('mousedown', handleClickOutside as EventListener)
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('mousedown', handleClickOutside as EventListener)
     }
   }, [actionsOpen])
 
   return (
     <>
       <Card className='border shadow-sm hover:shadow-lg transition-shadow duration-300 rounded-lg relative'>
-        <CardContent>
-          <div className='flex items-start justify-between'>
-            <h3 className='font-semibold text-foreground truncate max-w-[200px] sm:max-w-[220px]'>{title}</h3>
-            <Button
-              ref={cancelButtonRef}
-              variant={'ghost'}
-              size={'icon'}
-              className=''
-              onClick={handleActionsToggle}
-              aria-label='More actions'
-            >
-              <MoreVertical className='w-4 h-4 text-muted-foreground' />
-            </Button>
-          </div>
-
-          <TimeAgo date={createdAt} className='mb-3' />
-
-          <p className='mb-4 text-sm text-muted-foreground lg:min-h-10 line-clamp-2'>{description}</p>
-
-          <div className='flex items-center gap-2'>
-            <Tag className='w-4 h-4 text-muted-foreground' />
-            <div className='flex gap-2'>
-              {tags.map((tag) => (
-                <Badge key={tag} variant={'secondary'} className='text-xs'>
-                  {tag}
-                </Badge>
-              ))}
+        <Link href={`/notes/${id}`} className='block'>
+          <CardContent>
+            <div className='flex items-start justify-between'>
+              <h3 className='font-semibold text-foreground truncate max-w-[200px] sm:max-w-[220px]'>{title}</h3>
+              <Button
+                ref={cancelButtonRef}
+                variant={'ghost'}
+                size={'icon'}
+                className=''
+                onClick={handleActionsToggle}
+                aria-label='More actions'
+              >
+                <MoreVertical className='w-4 h-4 text-muted-foreground' />
+              </Button>
             </div>
-          </div>
-        </CardContent>
+
+            <TimeAgo date={createdAt} className='mb-3' />
+
+            <p className='mb-4 text-sm text-muted-foreground lg:min-h-10 line-clamp-2'>{description}</p>
+
+            <div className='flex items-center gap-2'>
+              <Tag className='w-4 h-4 text-muted-foreground' />
+              <div className='flex gap-2'>
+                {tags.map((tag) => (
+                  <Badge key={tag} variant={'secondary'} className='text-xs'>
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Link>
 
         {/* Actions Menu */}
         {actionsOpen && (
@@ -88,9 +113,7 @@ const NoteCard = ({ id, title, description, createdAt, tags }: NoteCardProps) =>
               <Button
                 variant='ghost'
                 className='w-full flex items-center gap-2 px-3 py-2 text-sm justify-start border-b'
-                onClick={() => {
-                  setActionsOpen(false)
-                }}
+                onClick={handleEdit}
               >
                 <Edit className='w-4 h-4' />
                 <span>Edit</span>
@@ -98,9 +121,7 @@ const NoteCard = ({ id, title, description, createdAt, tags }: NoteCardProps) =>
               <Button
                 variant='ghost'
                 className='w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 justify-start hover:bg-red-50 hover:text-red-600'
-                onClick={() => {
-                  setActionsOpen(false)
-                }}
+                onClick={handleDelete}
               >
                 <Trash className='w-4 h-4' />
                 <span>Delete</span>
@@ -108,28 +129,20 @@ const NoteCard = ({ id, title, description, createdAt, tags }: NoteCardProps) =>
             </div>
             {/* Mobile: Bottom sheet */}
             <div className='md:hidden fixed inset-x-0 bottom-0 z-30 bg-white border-t rounded-t-lg shadow-lg p-4 flex flex-col gap-2'>
-              <Button
-                variant='outline'
-                className='w-full flex items-center gap-2 justify-center'
-                onClick={() => {
-                  setActionsOpen(false)
-                }}
-              >
+              <Button variant='outline' className='w-full flex items-center gap-2 justify-center' onClick={handleEdit}>
                 <Edit className='w-4 h-4' /> Edit
               </Button>
               <Button
                 variant='outline'
                 className='w-full flex items-center gap-2 justify-center text-white bg-red-600 hover:text-red-600 hover:bg-red-50'
-                onClick={() => {
-                  setActionsOpen(false)
-                }}
+                onClick={handleDelete}
               >
                 <Trash className='w-4 h-4' /> Delete
               </Button>
               <Button
                 variant='ghost'
                 className='w-full flex items-center gap-2 justify-center text-red-600'
-                onClick={() => setActionsOpen(false)}
+                onClick={handleCancel}
               >
                 Cancel
               </Button>
