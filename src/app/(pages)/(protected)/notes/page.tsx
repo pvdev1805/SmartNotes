@@ -7,6 +7,7 @@ import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
 import useQueryConfig from '@/hooks/use-query-config'
 import useUpdateQueryParam from '@/hooks/use-update-query-param'
+import NoteCard from '@/components/notes/note-card'
 
 const notes = [
   {
@@ -284,6 +285,15 @@ const NotesListPage = () => {
 
   const paginatedNotes = filteredNotes.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let keyword = e.target.value
+    if (keyword.trim() === '') {
+      setSearch('')
+    } else {
+      setSearch(keyword)
+    }
+  }
+
   return (
     <div className='min-h-screen bg-gray-50 px-4 py-4 overflow-hidden'>
       {/* Header */}
@@ -304,14 +314,14 @@ const NotesListPage = () => {
       {/* Search & Filter */}
       <AnimatedSection delay={0.1}>
         <div className='flex items-center gap-4 mb-6'>
-          <div className='relative flex-1'>
+          <div className='relative'>
             <Search className='absolute left-3 top-3 text-gray-400 w-5 h-5' />
             <input
               type='text'
               placeholder='Search notes...'
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className='w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white shadow-sm'
+              onChange={handleSearchInputChange}
+              className='w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white shadow-sm'
             />
           </div>
           <Button variant='outline' className='flex items-center gap-2'>
@@ -331,28 +341,14 @@ const NotesListPage = () => {
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {paginatedNotes.map((note) => (
-              <Card
+              <NoteCard
                 key={note.id}
-                className='group border shadow-sm hover:shadow-lg transition-shadow duration-300 rounded-xl bg-white relative'
-              >
-                <CardContent className='p-5'>
-                  <div className='flex items-center justify-between mb-2'>
-                    <h2 className='font-semibold text-xl text-gray-800 truncate'>{note.title}</h2>
-                    <Button variant='ghost' size='icon' className='opacity-0 group-hover:opacity-100 transition'>
-                      <MoreVertical className='w-5 h-5 text-gray-400' />
-                    </Button>
-                  </div>
-                  <p className='text-gray-600 mb-3 line-clamp-2'>{note.description}</p>
-                  <div className='flex flex-wrap gap-2 mb-2'>
-                    {note.tags.map((tag) => (
-                      <span key={tag} className='bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-xs font-medium'>
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className='text-xs text-gray-400'>Last updated: {note.updatedAt}</div>
-                </CardContent>
-              </Card>
+                id={note.id}
+                title={note.title}
+                description={note.description}
+                createdAt={new Date(note.createdAt)}
+                tags={note.tags}
+              />
             ))}
           </div>
         )}

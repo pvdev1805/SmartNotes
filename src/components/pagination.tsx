@@ -20,7 +20,7 @@ const Pagination = ({ total, pageSize, currentPage, onPageChange }: PaginationPr
         onClick={() => onPageChange(currentPage - 1)}
         aria-label='Previous page'
       >
-        <ChevronLeft className='w-4 h-4' />
+        <ChevronLeft className='w-6 h-6' />
       </button>
       {pages.map((page, idx) =>
         typeof page === 'number' ? (
@@ -50,7 +50,7 @@ const Pagination = ({ total, pageSize, currentPage, onPageChange }: PaginationPr
         onClick={() => onPageChange(currentPage + 1)}
         aria-label='Next page'
       >
-        <ChevronRight className='w-4 h-4' />
+        <ChevronRight className='w-6 h-6' />
       </button>
     </nav>
   )

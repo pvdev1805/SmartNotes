@@ -68,39 +68,41 @@ const NoteCard = ({ id, title, description, createdAt, tags }: NoteCardProps) =>
 
   return (
     <>
-      <Card className='border shadow-sm hover:shadow-lg transition-shadow duration-300 rounded-lg relative'>
-        <Link href={`/notes/${id}`} className='block'>
-          <CardContent>
-            <div className='flex items-start justify-between'>
-              <h3 className='font-semibold text-foreground truncate max-w-[200px] sm:max-w-[220px]'>{title}</h3>
-              <Button
-                ref={cancelButtonRef}
-                variant={'ghost'}
-                size={'icon'}
-                className=''
-                onClick={handleActionsToggle}
-                aria-label='More actions'
-              >
-                <MoreVertical className='w-4 h-4 text-muted-foreground' />
-              </Button>
-            </div>
-
-            <TimeAgo date={createdAt} className='mb-3' />
-
-            <p className='mb-4 text-sm text-muted-foreground lg:min-h-10 line-clamp-2'>{description}</p>
-
-            <div className='flex items-center gap-2'>
-              <Tag className='w-4 h-4 text-muted-foreground' />
-              <div className='flex gap-2'>
-                {tags.map((tag) => (
-                  <Badge key={tag} variant={'secondary'} className='text-xs'>
-                    {tag}
-                  </Badge>
-                ))}
+      <Card className='p-0 border shadow-sm hover:shadow-lg transition-shadow duration-300 rounded-lg relative'>
+        <div className='relative'>
+          <Button
+            ref={cancelButtonRef}
+            variant={'ghost'}
+            size={'icon'}
+            className='absolute top-2 right-2 z-1'
+            onClick={handleActionsToggle}
+            aria-label='More actions'
+          >
+            <MoreVertical className='w-4 h-4 text-muted-foreground' />
+          </Button>
+          <Link href={`/notes/${id}`} className='block p-4 hover:bg-gray-50 transition-colors duration-200 rounded-lg'>
+            <CardContent className='p-0'>
+              <div className='flex items-start justify-between mb-1'>
+                <h3 className='font-semibold text-foreground truncate max-w-[200px] sm:max-w-[220px]'>{title}</h3>
               </div>
-            </div>
-          </CardContent>
-        </Link>
+
+              <TimeAgo date={createdAt} className='mb-2' />
+
+              <p className='mb-4 text-sm text-muted-foreground lg:min-h-10 line-clamp-2'>{description}</p>
+
+              <div className='flex items-center gap-2'>
+                <Tag className='w-4 h-4 text-muted-foreground' />
+                <div className='flex gap-2'>
+                  {tags.map((tag) => (
+                    <Badge key={tag} variant={'secondary'} className='text-xs'>
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Link>
+        </div>
 
         {/* Actions Menu */}
         {actionsOpen && (
