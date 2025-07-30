@@ -102,7 +102,10 @@ const NoteDetailsPage = () => {
                       Cancel
                     </Button>
 
-                    <Button className='bg-blue-600 text-white hover:bg-blue-700' onClick={handleSaveNote}>
+                    <Button
+                      className='bg-blue-600 text-white hover:text-blue-600 hover:border-blue-600 hover:bg-white transition-colors duration-200 flex items-center'
+                      onClick={handleSaveNote}
+                    >
                       <Save className='w-4 h-4' /> Save
                     </Button>
                   </>
