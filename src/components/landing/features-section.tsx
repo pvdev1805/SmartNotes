@@ -46,8 +46,8 @@ const features = [
 const FeaturesSection = () => {
   return (
     <>
-      <section className='w-full py-12 px-4 rounded-lg'>
-        <div className='flex flex-col items-center'>
+      <section className='w-full'>
+        <div className='max-w-7xl flex flex-col items-center mx-auto py-12 px-4 rounded-lg'>
           <div className='max-w-3xl mx-auto text-center'>
             <h2 className='mb-2 text-2xl md:text-3xl lg:text-4xl text-gray-900 font-bold'>
               Everything you need to learn smarter
@@ -56,7 +56,7 @@ const FeaturesSection = () => {
               Powerful features designed to enhance your learning experience and boost retention
             </p>
           </div>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
             {features.map((item) => (
               <Card
                 key={item.title}

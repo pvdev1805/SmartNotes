@@ -1,3 +1,5 @@
+'use client'
+
 import AnimatedSection from '@/components/landing/animated-section'
 import NoteCard from '@/components/notes/note-card'
 import TimeAgo from '@/components/time-ago'
@@ -6,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { BookOpen, ChevronRight, Edit, FileText, Plus, Tag, Target, Trash, Upload, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 // Mock data for stats
 const statsData = [
@@ -98,6 +101,8 @@ const uploadedPDFs = [
 ]
 
 const Home = () => {
+  const router = useRouter()
+
   return (
     <>
       <div className='min-h-screen bg-gray-50 px-4 py-4 space-y-8 overflow-hidden'>
@@ -111,7 +116,10 @@ const Home = () => {
               </h1>
               <p className='mt-1 text-sm text-muted-foreground'>Ready to continue your learning journey?</p>
             </div>
-            <Button className='bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600  hover:to-purple-600 flex'>
+            <Button
+              className='bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600  hover:to-purple-600 flex'
+              onClick={() => router.push('/notes/new')}
+            >
               <Plus className='w-4 h-4' />
               New Note
             </Button>

@@ -8,7 +8,7 @@ const LandingHeader = () => {
       <header className='flex items-center justify-between bg-white dark:bg-gray-800 shadow-md border-b dark:border-gray-700'>
         <Logo />
 
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center gap-2 mr-4'>
           <Button asChild variant={'outline'}>
             <Link href='/login' className='text-sm font-medium hover:bg-gray-800 hover:text-white transition-colors'>
               Sign In

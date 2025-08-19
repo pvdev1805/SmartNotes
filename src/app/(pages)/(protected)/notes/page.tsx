@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import { Plus, Search, Filter, Notebook, MoreVertical } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
@@ -10,8 +9,11 @@ import useUpdateQueryParam from '@/hooks/use-update-query-param'
 import NoteCard from '@/components/notes/note-card'
 
 import { notes } from '@/data/notes'
+import { useRouter } from 'next/navigation'
 
 const NotesListPage = () => {
+  const router = useRouter()
+
   const [search, setSearch] = useState('')
 
   const filteredNotes = notes.filter(
@@ -46,7 +48,10 @@ const NotesListPage = () => {
             <Notebook className='w-7 h-7 text-blue-600' />
             My Notes
           </h1>
-          <Button className='flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:from-blue-600 hover:to-purple-600 transition'>
+          <Button
+            className='flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:from-blue-600 hover:to-purple-600 transition'
+            onClick={() => router.push('/notes/new')}
+          >
             <Plus className='w-5 h-5' />
             New Note
           </Button>

@@ -15,7 +15,7 @@ const Header = () => {
         {/* Desktop User Profile (hidden on mobile) */}
         <div className='hidden lg:block'>
           <DropdownMenu>
-            <DropdownMenuTrigger className='flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors'>
+            <DropdownMenuTrigger className='flex items-center gap-2 px-4 py-2 mr-4 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors'>
               <Avatar className='cursor-pointer flex items-center gap-2'>
                 <AvatarImage src='/avatar.svg' alt='John Smith' />
                 <AvatarFallback>JS</AvatarFallback>

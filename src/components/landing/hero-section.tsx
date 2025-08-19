@@ -4,8 +4,8 @@ import Link from 'next/link'
 const HeroSection = () => {
   return (
     <>
-      <section className='w-full bg-blue-50 py-12 px-4 border-b rounded-lg'>
-        <div className='flex flex-col items-center'>
+      <section className='w-full'>
+        <div className='max-w-7xl flex flex-col items-center mx-auto bg-blue-50 py-12 px-4 border-b rounded-lg'>
           <div className='max-w-3xl mx-auto text-center'>
             <h1 className='mb-2 text-2xl md:text-3xl lg:text-4xl font-bold'>
               Smart, organized, and{' '}

@@ -12,8 +12,8 @@ const benefits = [
 ]
 
 const WhyChooseSection = () => (
-  <section className='w-full bg-blue-50 py-12 px-4 border-b rounded-lg' data-aos='fade-up' data-aos-delay='400'>
-    <div className='flex flex-col items-center space-y-4'>
+  <section className='w-full' data-aos='fade-up' data-aos-delay='400'>
+    <div className='max-w-7xl flex flex-col items-center space-y-4 mx-auto bg-blue-50 py-12 px-4 border-b rounded-lg'>
       <div className='max-w-3xl mx-auto text-center'>
         <h2 className='mb-2 text-2xl md:text-3xl lg:text-4xl text-gray-900 font-bold'>Why Choose SmartNotes?</h2>
         <p className='lg:text-lg text-gray-600 mb-4'>

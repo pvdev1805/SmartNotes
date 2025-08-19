@@ -58,7 +58,7 @@ const NewNotePage = () => {
 
               <div className='flex items-center gap-2'>
                 <Button
-                  className='bg-blue-600 text-white hover:text-blue-600 hover:border-blue-600 hover:bg-white transition-colors duration-200 flex items-center'
+                  className='bg-blue-600 text-white hover:text-blue-600 hover:border-blue-600 hover:border hover:bg-white transition-colors duration-200 flex items-center'
                   onClick={handleSaveNote}
                 >
                   <Save className='w-4 h-4' /> Save
@@ -83,16 +83,6 @@ const NewNotePage = () => {
             </div>
 
             <div className='mb-2'>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Content</label>
-              <textarea
-                className='w-full border rounded-lg px-3 py-2 h-40 resize-none'
-                value={description}
-                onChange={handleDescriptionChange}
-                placeholder='Write your note content here...'
-              ></textarea>
-            </div>
-
-            <div className='mb-2'>
               <label className='block text-sm font-medium text-gray-700 mb-1'>Tags</label>
               <input
                 className='w-full border rounded-lg px-3 py-2'
@@ -100,6 +90,16 @@ const NewNotePage = () => {
                 onChange={handleTagsInputChange}
                 placeholder='Add tags (comma separated)'
               />
+            </div>
+
+            <div className='mb-2'>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>Content</label>
+              <textarea
+                className='w-full border rounded-lg px-3 py-2 h-40 resize-none'
+                value={description}
+                onChange={handleDescriptionChange}
+                placeholder='Write your note content here...'
+              ></textarea>
             </div>
           </CardContent>
         </Card>
