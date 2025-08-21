@@ -74,7 +74,7 @@ const NewNotePage = () => {
             <div className='mb-2'>
               <label className='block text-sm font-medium text-gray-700 mb-1'>Title</label>
               <input
-                className='w-full border rounded-lg px-3 py-2 text-lg font-semibold'
+                className='w-full border rounded-lg px-3 py-2'
                 value={title}
                 onChange={handleChangeTitle}
                 placeholder='Enter note title'

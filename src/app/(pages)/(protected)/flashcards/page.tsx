@@ -7,9 +7,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { flashcards as flashcardsData } from '@/data/flashcards'
 import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
+import Flashcard from '@/components/flashcards/flashcard'
 import useQueryConfig from '@/hooks/use-query-config'
 import useUpdateQueryParam from '@/hooks/use-update-query-param'
-import { BookText, Plus, Search } from 'lucide-react'
+import { BookText, Notebook, Plus, Search } from 'lucide-react'
 
 const PAGE_SIZE = 6
 
@@ -116,28 +117,24 @@ const FlashcardsPage = () => {
         </AnimatedSection>
 
         <AnimatedSection delay={0.2}>
-          <div className='grid gap-4'>
-            {paginatedFlashcards.length === 0 ? (
-              <div className='text-center text-gray-400 py-12'>No flashcards found.</div>
-            ) : (
-              paginatedFlashcards.map((card) => (
-                <Card key={card.id} className='w-full shadow-lg rounded-xl bg-white'>
-                  <CardContent className='p-6'>
-                    <div className='font-semibold text-lg mb-2 text-gray-900'>{card.question}</div>
-                    <div className='text-gray-700 mb-3'>{card.answer}</div>
-                    <div className='flex items-center gap-2 flex-wrap'>
-                      <BookText className='w-5 h-5 text-muted-foreground' />
-                      {(card.collections ?? []).map((collection) => (
-                        <span key={collection.id} className='bg-gray-200 text-xs px-2 py-1 rounded'>
-                          {collection.name}
-                        </span>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
+          {paginatedFlashcards.length === 0 ? (
+            <div className='text-center text-gray-500 py-16'>
+              <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
+              <p className='text-lg'>No flashcards found.</p>
+            </div>
+          ) : (
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {paginatedFlashcards.map((card) => (
+                <Flashcard
+                  key={card.id}
+                  id={card.id}
+                  question={card.question}
+                  answer={card.answer}
+                  collections={card.collections}
+                />
+              ))}
+            </div>
+          )}
         </AnimatedSection>
 
         {/* Pagination */}
