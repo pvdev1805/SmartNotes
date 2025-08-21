@@ -1,0 +1,159 @@
+'use client'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+
+import { flashcards as flashcardsData } from '@/data/flashcards'
+import AnimatedSection from '@/components/landing/animated-section'
+import Pagination from '@/components/pagination'
+import useQueryConfig from '@/hooks/use-query-config'
+import useUpdateQueryParam from '@/hooks/use-update-query-param'
+import { BookText, Plus, Search } from 'lucide-react'
+
+const PAGE_SIZE = 6
+
+const FlashcardsPage = () => {
+  const router = useRouter()
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true)
+      // Simulate fetching
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          setFlashcards(flashcardsData)
+          resolve(null)
+        }, 500)
+      })
+      setLoading(false)
+    }
+    fetchData()
+  }, [])
+
+  // Filter flashcards by search
+  const filteredFlashcards = flashcards.filter(
+    (card) =>
+      card.question.toLowerCase().includes(search.toLowerCase()) ||
+      card.answer.toLowerCase().includes(search.toLowerCase())
+  )
+
+  // Pagination logic
+  const queryConfig = useQueryConfig()
+  const setQueryParam = useUpdateQueryParam()
+  const currentPage = Number(queryConfig.page) || 1
+  const paginatedFlashcards = filteredFlashcards.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let keyword = e.target.value
+    if (keyword.trim() === '') {
+      setSearch('')
+    } else {
+      setSearch(keyword)
+    }
+  }
+
+  const handleAddFlashcard = () => {
+    router.push('/flashcards/new')
+  }
+
+  const handleViewCollections = () => {
+    router.push('/collections')
+  }
+
+  if (loading) {
+    return (
+      <div className='flex items-center justify-center min-h-screen bg-gray-50'>
+        <div className='text-lg text-gray-500'>Loading...</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className='min-h-screen flex flex-col items-center bg-gray-50 px-4 py-4'>
+      <div className='w-full'>
+        <AnimatedSection delay={0}>
+          <div className='flex items-center justify-between mb-4'>
+            <div className='flex flex-col'>
+              <h2 className='text-2xl font-bold text-gray-900'>Flashcards</h2>
+              <p className='text-gray-600 text-sm md:text-base lg:text-lg max-w-2xl leading-relaxed'>
+                Study with your interactive flashcards
+              </p>
+            </div>
+
+            <div className='flex gap-2'>
+              <Button variant='outline' onClick={handleViewCollections}>
+                View Collections
+              </Button>
+              <Button
+                className='flex items-center gap-2 bg-gradient-to-r from-emerald-400 to-teal-600 text-white font-semibold px-4 py-2 rounded-lg shadow hover:from-emerald-500 hover:to-teal-700 transition'
+                onClick={handleAddFlashcard}
+              >
+                <Plus className='w-5 h-5' />
+                New Flashcard
+              </Button>
+            </div>
+          </div>
+        </AnimatedSection>
+
+        {/* Search Input */}
+        <AnimatedSection delay={0.1}>
+          <div className='flex items-center mb-6'>
+            <div className='relative'>
+              <Search className='absolute left-3 top-3 text-gray-400 w-5 h-5' />
+              <input
+                type='text'
+                placeholder='Search notes...'
+                value={search}
+                onChange={handleSearchInputChange}
+                className='w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white shadow-sm'
+              />
+            </div>
+          </div>
+        </AnimatedSection>
+
+        <AnimatedSection delay={0.2}>
+          <div className='grid gap-4'>
+            {paginatedFlashcards.length === 0 ? (
+              <div className='text-center text-gray-400 py-12'>No flashcards found.</div>
+            ) : (
+              paginatedFlashcards.map((card) => (
+                <Card key={card.id} className='w-full shadow-lg rounded-xl bg-white'>
+                  <CardContent className='p-6'>
+                    <div className='font-semibold text-lg mb-2 text-gray-900'>{card.question}</div>
+                    <div className='text-gray-700 mb-3'>{card.answer}</div>
+                    <div className='flex items-center gap-2 flex-wrap'>
+                      <BookText className='w-5 h-5 text-muted-foreground' />
+                      {(card.collections ?? []).map((collection) => (
+                        <span key={collection.id} className='bg-gray-200 text-xs px-2 py-1 rounded'>
+                          {collection.name}
+                        </span>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </AnimatedSection>
+
+        {/* Pagination */}
+        <AnimatedSection delay={0.2}>
+          {filteredFlashcards.length > 0 && (
+            <Pagination
+              total={filteredFlashcards.length}
+              pageSize={PAGE_SIZE}
+              currentPage={currentPage}
+              onPageChange={(page) => setQueryParam('page', String(page))}
+            />
+          )}
+        </AnimatedSection>
+      </div>
+    </div>
+  )
+}
+
+export default FlashcardsPage

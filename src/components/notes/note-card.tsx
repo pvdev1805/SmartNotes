@@ -20,6 +20,10 @@ const NoteCard = ({ id, title, description, createdAt, tags }: NoteCardProps) =>
   const menuRef = useRef<HTMLDivElement>(null)
   const cancelButtonRef = useRef<HTMLButtonElement>(null)
 
+  const MAX_TAGS_DISPLAY = 2
+  const visibleTags = tags.slice(0, MAX_TAGS_DISPLAY)
+  const hiddenCount = tags.length - visibleTags.length
+
   const handleClickOutside = (event: MouseEvent | globalThis.MouseEvent) => {
     if (
       menuRef.current &&
@@ -92,12 +96,17 @@ const NoteCard = ({ id, title, description, createdAt, tags }: NoteCardProps) =>
 
               <div className='flex items-center gap-2'>
                 <Tag className='w-4 h-4 text-muted-foreground' />
-                <div className='flex gap-2'>
-                  {tags.map((tag) => (
-                    <Badge key={tag} variant={'secondary'} className='text-xs'>
-                      {tag}
+                <div className='flex gap-2 max-w-[180px]'>
+                  {visibleTags.map((tag) => (
+                    <Badge key={tag} variant={'secondary'} className='text-xs max-w-[80px] truncate'>
+                      {tag.length > 12 ? `${tag.slice(0, 12)}...` : tag}
                     </Badge>
                   ))}
+                  {hiddenCount > 0 && (
+                    <Badge variant={'secondary'} className='text-xs bg-gray-200 text-gray-600'>
+                      +{hiddenCount} more
+                    </Badge>
+                  )}
                 </div>
               </div>
             </CardContent>

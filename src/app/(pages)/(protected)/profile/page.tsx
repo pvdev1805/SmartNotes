@@ -118,7 +118,9 @@ const UserProfilePage = () => {
         <Card className='w-full shadow-lg rounded-xl p-6 bg-white'>
           <CardContent>
             <h2 className='text-2xl font-bold text-gray-900 mb-1'>Profile Settings</h2>
-            <p className='text-sm text-gray-600 mb-6'>Manage your account information and preferences</p>
+            <p className='text-sm text-gray-600 md:text-base lg:text-lg max-w-2xl leading-relaxed mb-6'>
+              Manage your account information and preferences
+            </p>
 
             <form onSubmit={handleSave}>
               <div className='mb-8 border-2 border-gray-300 p-4 rounded-lg shadow-sm'>
