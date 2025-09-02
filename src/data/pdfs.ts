@@ -1,23 +1,30 @@
 export const pdfs = [
   {
     id: 1,
-    title: 'PDF 1',
-    author: 'Author 1',
-    year: 2021,
-    file: '/pdfs/pdf1.pdf'
+    fileName: 'React_Hooks_Guide.pdf',
+    size: '1.2 MB',
+    downloadUrl: '/downloads/React_Hooks_Guide.pdf',
+    uploadedAt: new Date('2025-07-01')
   },
   {
     id: 2,
-    title: 'PDF 2',
-    author: 'Author 2',
-    year: 2022,
-    file: '/pdfs/pdf2.pdf'
+    fileName: 'AI_and_Machine_Learning.pdf',
+    size: '2.5 MB',
+    downloadUrl: '/downloads/AI_and_Machine_Learning.pdf',
+    uploadedAt: new Date('2025-07-02')
   },
   {
     id: 3,
-    title: 'PDF 3',
-    author: 'Author 3',
-    year: 2023,
-    file: '/pdfs/pdf3.pdf'
+    fileName: 'Web_Development_Trends.pdf',
+    size: '1.8 MB',
+    downloadUrl: '/downloads/Web_Development_Trends.pdf',
+    uploadedAt: new Date('2025-07-03')
+  },
+  {
+    id: 4,
+    fileName: 'NextJS_Basics.pdf',
+    size: '1.0 MB',
+    downloadUrl: '/downloads/NextJS_Basics.pdf',
+    uploadedAt: new Date('2025-07-04')
   }
 ]

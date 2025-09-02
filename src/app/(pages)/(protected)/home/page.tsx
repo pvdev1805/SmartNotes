@@ -2,10 +2,10 @@
 
 import AnimatedSection from '@/components/landing/animated-section'
 import NoteCard from '@/components/notes/note-card'
-import TimeAgo from '@/components/time-ago'
-import { Badge } from '@/components/ui/badge'
+import PDFItem from '@/components/PDFs/PDFItem'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { pdfs } from '@/data/pdfs'
 import { BookOpen, ChevronRight, Edit, FileText, Plus, Tag, Target, Trash, Upload, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -73,32 +73,7 @@ const recentNotes = [
 ]
 
 // Mock data for PDFs
-const uploadedPDFs = [
-  {
-    id: 1,
-    fileName: 'React_Hooks_Guide.pdf',
-    size: '1.2 MB',
-    uploadedAt: new Date('2025-07-01')
-  },
-  {
-    id: 2,
-    fileName: 'AI_and_Machine_Learning.pdf',
-    size: '2.5 MB',
-    uploadedAt: new Date('2025-07-02')
-  },
-  {
-    id: 3,
-    fileName: 'Web_Development_Trends.pdf',
-    size: '1.8 MB',
-    uploadedAt: new Date('2025-07-03')
-  },
-  {
-    id: 4,
-    fileName: 'NextJS_Basics.pdf',
-    size: '1.0 MB',
-    uploadedAt: new Date('2025-07-04')
-  }
-]
+const uploadedPDFs = pdfs
 
 const Home = () => {
   const router = useRouter()
@@ -192,30 +167,23 @@ const Home = () => {
             </div>
 
             <div className='space-y-3'>
-              {uploadedPDFs.map((pdf) => (
-                <Card
-                  key={pdf.id}
-                  className='border shadow-sm hover:shadow-lg transition-shadow duration-300 rounded-lg'
-                >
-                  <CardContent className='flex items-center justify-between'>
-                    <div className='flex items-center gap-2'>
-                      <div className='p-2 rounded-md bg-red-100 text-red-600'>
-                        <FileText className='w-6 h-6' />
-                      </div>
-                      <div>
-                        <p
-                          className='font-semibold text-foreground truncate max-w-[140px] sm:max-w-[160px]'
-                          title={pdf.fileName}
-                        >
-                          {pdf.fileName}
-                        </p>
-                        <p className='text-sm text-muted-foreground'>{pdf.size}</p>
-                      </div>
-                    </div>
-                    <TimeAgo date={pdf.uploadedAt} className='text-sm text-muted-foreground' />
-                  </CardContent>
-                </Card>
-              ))}
+              {uploadedPDFs.length === 0 ? (
+                <div className='text-center text-gray-500 py-16'>
+                  <p className='text-lg'>No PDFs uploaded yet.</p>
+                </div>
+              ) : (
+                <div className='flex items-center justify-between flex-wrap gap-4'>
+                  {uploadedPDFs.map((pdf) => (
+                    <PDFItem
+                      key={pdf.id}
+                      fileName={pdf.fileName}
+                      size={pdf.size}
+                      downloadUrl={pdf.downloadUrl}
+                      createdAt={pdf.uploadedAt}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </section>
         </AnimatedSection>

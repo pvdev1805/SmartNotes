@@ -2,6 +2,7 @@
 
 import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
+import PDFItem from '@/components/PDFs/PDFItem'
 import { Button } from '@/components/ui/button'
 import { pdfs } from '@/data/pdfs'
 import useQueryConfig from '@/hooks/use-query-config'
@@ -15,7 +16,7 @@ const PDFListPage = () => {
 
   const [search, setSearch] = useState('')
 
-  const filteredPdfs = pdfs.filter((pdf) => pdf.title.toLowerCase().includes(search.toLowerCase()))
+  const filteredPdfs = pdfs.filter((pdf) => pdf.fileName.toLowerCase().includes(search.toLowerCase()))
 
   const pageSize = 6
   const queryConfig = useQueryConfig()
@@ -86,15 +87,15 @@ const PDFListPage = () => {
             <p className='text-lg'>No PDFs found. Try a different search or add a new PDF!</p>
           </div>
         ) : (
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+          <div className='flex items-center flex-wrap gap-4'>
             {paginatedPdfs.map((pdf) => (
-              <div key={pdf.id} className='bg-white rounded-lg shadow overflow-hidden'>
-                <div className='p-4'>
-                  <h3 className='text-lg font-semibold'>{pdf.title}</h3>
-                  <p className='text-sm text-gray-500'>{pdf.author}</p>
-                  <p className='text-sm text-gray-500'>{pdf.year}</p>
-                </div>
-              </div>
+              <PDFItem
+                key={pdf.id}
+                fileName={pdf.fileName}
+                size={pdf.size}
+                downloadUrl={pdf.downloadUrl}
+                createdAt={pdf.uploadedAt}
+              />
             ))}
           </div>
         )}

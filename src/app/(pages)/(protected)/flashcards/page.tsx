@@ -114,7 +114,7 @@ const FlashcardsPage = () => {
               <Search className='absolute left-3 top-3 text-gray-400 w-5 h-5' />
               <input
                 type='text'
-                placeholder='Search notes...'
+                placeholder='Search flashcards...'
                 value={search}
                 onChange={handleSearchInputChange}
                 className='w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white shadow-sm'
