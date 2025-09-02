@@ -1,37 +1,31 @@
 'use client'
-import { useState } from 'react'
-import { Plus, Search, Filter, Notebook } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+
 import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
+import { Button } from '@/components/ui/button'
+import { pdfs } from '@/data/pdfs'
 import useQueryConfig from '@/hooks/use-query-config'
 import useUpdateQueryParam from '@/hooks/use-update-query-param'
-import NoteCard from '@/components/notes/note-card'
-
-import { notes } from '@/data/notes'
+import { BookOpenText, Filter, Notebook, Plus, Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
-const NotesListPage = () => {
+const PDFListPage = () => {
   const router = useRouter()
 
   const [search, setSearch] = useState('')
 
-  const filteredNotes = notes.filter(
-    (note) =>
-      note.title.toLowerCase().includes(search.toLowerCase()) ||
-      note.description.toLowerCase().includes(search.toLowerCase()) ||
-      note.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase()))
-  )
+  const filteredPdfs = pdfs.filter((pdf) => pdf.title.toLowerCase().includes(search.toLowerCase()))
 
   const pageSize = 6
   const queryConfig = useQueryConfig()
   const setQueryParam = useUpdateQueryParam()
   const currentPage = Number(queryConfig.page) || 1
 
-  const paginatedNotes = filteredNotes.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  const paginatedPdfs = filteredPdfs.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 
-  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let keyword = e.target.value
+  const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let keyword = event.target.value
     if (keyword.trim() === '') {
       setSearch('')
     } else {
@@ -49,15 +43,15 @@ const NotesListPage = () => {
       <AnimatedSection delay={0}>
         <div className='flex items-center justify-between mb-8'>
           <h1 className='text-3xl font-bold text-gray-900 flex items-center gap-2'>
-            <Notebook className='w-7 h-7 text-blue-600' />
-            My Notes
+            <BookOpenText className='w-7 h-7 text-blue-600' />
+            My PDFs
           </h1>
           <Button
-            className='flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:from-blue-600 hover:to-purple-600 transition'
-            onClick={() => router.push('/notes/new')}
+            className='flex items-center gap-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-semibold px-4 py-2 rounded-lg shadow transition'
+            onClick={() => router.push('/pdfs/new')}
           >
             <Plus className='w-5 h-5' />
-            New Note
+            New PDF
           </Button>
         </div>
       </AnimatedSection>
@@ -70,7 +64,7 @@ const NotesListPage = () => {
             <Search className='absolute left-3 top-3 text-gray-400 w-5 h-5' />
             <input
               type='text'
-              placeholder='Search notes...'
+              placeholder='Search pdfs...'
               value={search}
               onChange={handleSearchInputChange}
               className='w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white shadow-sm'
@@ -82,25 +76,25 @@ const NotesListPage = () => {
           </Button>
         </div>
       </AnimatedSection>
+      {/* End - Search & Filter */}
 
-      {/* Notes Grid */}
+      {/* PDF Grid */}
       <AnimatedSection delay={0.2}>
-        {filteredNotes.length === 0 ? (
+        {filteredPdfs.length === 0 ? (
           <div className='text-center text-gray-500 py-16'>
             <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
-            <p className='text-lg'>No notes found. Try a different search or add a new note!</p>
+            <p className='text-lg'>No PDFs found. Try a different search or add a new PDF!</p>
           </div>
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {paginatedNotes.map((note) => (
-              <NoteCard
-                key={note.id}
-                id={note.id}
-                title={note.title}
-                description={note.description}
-                createdAt={new Date(note.createdAt)}
-                tags={note.tags}
-              />
+            {paginatedPdfs.map((pdf) => (
+              <div key={pdf.id} className='bg-white rounded-lg shadow overflow-hidden'>
+                <div className='p-4'>
+                  <h3 className='text-lg font-semibold'>{pdf.title}</h3>
+                  <p className='text-sm text-gray-500'>{pdf.author}</p>
+                  <p className='text-sm text-gray-500'>{pdf.year}</p>
+                </div>
+              </div>
             ))}
           </div>
         )}
@@ -108,9 +102,9 @@ const NotesListPage = () => {
 
       {/* Pagination */}
       <AnimatedSection delay={0.2}>
-        {filteredNotes.length > pageSize && (
+        {filteredPdfs.length > pageSize && (
           <Pagination
-            total={filteredNotes.length}
+            total={filteredPdfs.length}
             pageSize={pageSize}
             currentPage={currentPage}
             onPageChange={handlePageChange}
@@ -122,4 +116,4 @@ const NotesListPage = () => {
   )
 }
 
-export default NotesListPage
+export default PDFListPage

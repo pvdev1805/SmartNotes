@@ -10,7 +10,7 @@ import Pagination from '@/components/pagination'
 import Flashcard from '@/components/flashcards/flashcard'
 import useQueryConfig from '@/hooks/use-query-config'
 import useUpdateQueryParam from '@/hooks/use-update-query-param'
-import { BookText, Notebook, Plus, Search } from 'lucide-react'
+import { BookText, Diamond, Notebook, Plus, Search } from 'lucide-react'
 
 const PAGE_SIZE = 6
 
@@ -57,6 +57,10 @@ const FlashcardsPage = () => {
     }
   }
 
+  const handlePageChange = (page: number) => {
+    setQueryParam('page', String(page))
+  }
+
   const handleAddFlashcard = () => {
     router.push('/flashcards/new')
   }
@@ -79,7 +83,10 @@ const FlashcardsPage = () => {
         <AnimatedSection delay={0}>
           <div className='flex items-center justify-between mb-4'>
             <div className='flex flex-col'>
-              <h2 className='text-2xl font-bold text-gray-900'>Flashcards</h2>
+              <h1 className='text-2xl font-bold text-gray-900'>
+                <Diamond className='w-7 h-7 text-emerald-500 inline-block mr-2' />
+                Flashcards
+              </h1>
               <p className='text-gray-600 text-sm md:text-base lg:text-lg max-w-2xl leading-relaxed'>
                 Study with your interactive flashcards
               </p>
@@ -144,7 +151,7 @@ const FlashcardsPage = () => {
               total={filteredFlashcards.length}
               pageSize={PAGE_SIZE}
               currentPage={currentPage}
-              onPageChange={(page) => setQueryParam('page', String(page))}
+              onPageChange={handlePageChange}
             />
           )}
         </AnimatedSection>

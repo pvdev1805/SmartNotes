@@ -1,7 +1,7 @@
 'use client'
 
 import clsx from 'clsx'
-import { FileText, GraduationCap, Home, LineChart, PieChart, Zap } from 'lucide-react'
+import { BookOpenText, FileText, GraduationCap, Home, LineChart, PieChart, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -15,6 +15,11 @@ const navItems = [
     title: 'Notes',
     href: '/notes',
     icon: FileText
+  },
+  {
+    title: 'PDFs',
+    href: '/pdfs',
+    icon: BookOpenText
   },
   {
     title: 'Flashcards',
