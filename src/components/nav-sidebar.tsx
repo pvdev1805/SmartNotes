@@ -27,8 +27,8 @@ const navItems = [
     icon: Zap
   },
   {
-    title: 'Quiz',
-    href: '/quiz',
+    title: 'Quizzes',
+    href: '/quizzes',
     icon: GraduationCap
   },
   {
