@@ -6,8 +6,8 @@ import { Sparkles, FileText, BookOpen } from 'lucide-react'
 
 const QuizzesPage = () => {
   return (
-    <div className='min-h-screen flex flex-col items-center bg-gray-50 px-2 py-8'>
-      <Card className='w-full max-w-2xl shadow-lg rounded-xl p-8 bg-white'>
+    <div className='min-h-screen flex flex-col items-center bg-gray-50'>
+      <Card className='w-full shadow-lg rounded-xl p-8 bg-white'>
         <CardContent>
           <div className='flex items-center gap-3 mb-4'>
             <Sparkles className='w-8 h-8 text-blue-600' />
