@@ -172,7 +172,7 @@ const Home = () => {
                   <p className='text-lg'>No PDFs uploaded yet.</p>
                 </div>
               ) : (
-                <div className='flex items-center justify-between flex-wrap gap-4'>
+                <div className='flex items-center flex-wrap gap-4'>
                   {uploadedPDFs.map((pdf) => (
                     <PDFItem
                       key={pdf.id}

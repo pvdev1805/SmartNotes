@@ -3,8 +3,15 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Sparkles, FileText, BookOpen } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
-const QuizzesPage = () => {
+const QuizPage = () => {
+  const router = useRouter()
+
+  const handleRedirectToCreateQuiz = () => {
+    router.push('/quiz/create')
+  }
+
   return (
     <div className='min-h-screen flex flex-col items-center bg-gray-50'>
       <Card className='w-full shadow-lg rounded-xl p-8 bg-white'>
@@ -22,7 +29,7 @@ const QuizzesPage = () => {
           <div className='mb-6 flex flex-col gap-4'>
             <div className='flex items-center gap-2'>
               <FileText className='w-5 h-5 text-gray-500' />
-              <span className='text-gray-800'>Select notes or upload a PDF document</span>
+              <span className='text-gray-800'>Select notes or uploaded PDFs document</span>
             </div>
             <div className='flex items-center gap-2'>
               <BookOpen className='w-5 h-5 text-gray-500' />
@@ -34,13 +41,7 @@ const QuizzesPage = () => {
             </div>
           </div>
           <div className='flex gap-4 mt-8'>
-            <Button
-              onClick={() => {
-                /* TODO: navigate to quiz creation */
-              }}
-            >
-              Try Quiz Generation
-            </Button>
+            <Button onClick={handleRedirectToCreateQuiz}>Try Quiz Generation</Button>
             <Button
               variant='outline'
               onClick={() => {
@@ -56,4 +57,4 @@ const QuizzesPage = () => {
   )
 }
 
-export default QuizzesPage
+export default QuizPage
