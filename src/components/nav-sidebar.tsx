@@ -1,6 +1,7 @@
 'use client'
 
 import clsx from 'clsx'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   BookOpenText,
   ChevronLeft,
@@ -67,17 +68,26 @@ const NavSidebar = () => {
     >
       <nav className='flex flex-col p-4 space-y-1'>
         {/* Expand/Minimize Button */}
-        <button
-          className='w-10 h-10 bg-white border rounded-full shadow p-2 transition hover:bg-blue-50 flex items-center justify-center mb-4 self-end'
-          onClick={() => setExpanded((prev) => !prev)}
-          aria-label={expanded ? 'Minimize sidebar' : 'Expand sidebar'}
-        >
-          {expanded ? (
-            <ChevronLeft className='w-5 h-5 text-blue-600' />
-          ) : (
-            <ChevronRight className='w-5 h-5 text-blue-600' />
-          )}
-        </button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className='w-10 h-10 bg-white border rounded-full shadow p-2 transition hover:bg-blue-50 flex items-center justify-center mb-4 self-end'
+                onClick={() => setExpanded((prev) => !prev)}
+                aria-label={expanded ? 'Minimize sidebar' : 'Expand sidebar'}
+              >
+                {expanded ? (
+                  <ChevronLeft className='w-5 h-5 text-blue-600' />
+                ) : (
+                  <ChevronRight className='w-5 h-5 text-blue-600' />
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side='top' className='bg-gray-800 text-white rounded p-2'>
+              <p>{expanded ? 'Collapse' : 'Expand'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
         {navItems.map((item) => {
           const isActive = pathname === item.href
