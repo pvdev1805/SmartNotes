@@ -11,12 +11,13 @@ import Flashcard from '@/components/flashcards/flashcard'
 import useQueryConfig from '@/hooks/use-query-config'
 import useUpdateQueryParam from '@/hooks/use-update-query-param'
 import { BookText, Diamond, Notebook, Plus, Search } from 'lucide-react'
+import { Flashcard as FlashcardType } from '@/types/flashcard.type'
 
 const PAGE_SIZE = 6
 
 const FlashcardsPage = () => {
   const router = useRouter()
-  const [flashcards, setFlashcards] = useState<Flashcard[]>([])
+  const [flashcards, setFlashcards] = useState<FlashcardType[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 

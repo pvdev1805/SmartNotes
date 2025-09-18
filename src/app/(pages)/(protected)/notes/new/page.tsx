@@ -49,7 +49,7 @@ const NewNotePage = () => {
   return (
     <>
       <div className='min-h-screen flex flex-col items-center bg-gray-50 px-2 py-4 rounded-lg'>
-        <Card className='w-full shadow-lg rounded-xl p-6 bg-white'>
+        <Card className='w-full max-w-3xl shadow-lg rounded-xl p-6 bg-white'>
           <CardContent>
             <div className='flex items-center justify-between mb-4'>
               <Button variant={'outline'} className='flex items-center' onClick={handleBack}>
