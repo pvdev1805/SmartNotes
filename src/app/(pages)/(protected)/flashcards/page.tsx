@@ -12,6 +12,7 @@ import useQueryConfig from '@/hooks/use-query-config'
 import useUpdateQueryParam from '@/hooks/use-update-query-param'
 import { BookText, Diamond, Notebook, Plus, Search } from 'lucide-react'
 import { Flashcard as FlashcardType } from '@/types/flashcard.type'
+import Link from 'next/link'
 
 const PAGE_SIZE = 6
 
@@ -133,13 +134,14 @@ const FlashcardsPage = () => {
           ) : (
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
               {paginatedFlashcards.map((card) => (
-                <Flashcard
-                  key={card.id}
-                  id={card.id}
-                  question={card.question}
-                  answer={card.answer}
-                  collections={card.collections}
-                />
+                <Link key={card.id} href={`/flashcards/${card.id}`}>
+                  <Flashcard
+                    id={card.id}
+                    question={card.question}
+                    answer={card.answer}
+                    collections={card.collections}
+                  />
+                </Link>
               ))}
             </div>
           )}
