@@ -37,6 +37,11 @@ const NotesListPage = () => {
     } else {
       setSearch(keyword)
     }
+
+    // Reset to first page on new search
+    if (currentPage !== 1) {
+      setQueryParam('page', '1')
+    }
   }
 
   const handlePageChange = (page: number) => {

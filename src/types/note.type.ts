@@ -1,12 +1,17 @@
-export interface Note {
-  id: string
+export interface Document {
+  id: number
   title: string
   content: string
   createdAt: string
   updatedAt?: string
   tags?: string[]
   isPinned?: boolean
+
+  type: 'NOTE' | 'PDF'
+  originType: 'USER' | 'AI'
 }
+
+export type Note = Document
 
 export interface NoteList {
   notes: Note[]
