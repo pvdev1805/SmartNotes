@@ -36,7 +36,16 @@ const LoginForm = () => {
 
     try {
       // Simulate API call for login
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      // await new Promise((resolve) => setTimeout(resolve, 2000))
+      const res = await fetch('http://localhost:8080/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
+      })
+      const jsonResponse = await res.json()
+
+      // store JWT securely
+      localStorage.setItem('jwtToken', jsonResponse.data.accessToken) // or use cookies
 
       router.push('/')
     } catch (error) {

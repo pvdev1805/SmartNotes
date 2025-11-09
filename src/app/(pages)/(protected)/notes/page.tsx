@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Plus, Search, Filter, Notebook } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AnimatedSection from '@/components/landing/animated-section'
@@ -8,19 +8,46 @@ import useQueryConfig from '@/hooks/use-query-config'
 import useUpdateQueryParam from '@/hooks/use-update-query-param'
 import NoteCard from '@/components/notes/note-card'
 
-import { notes } from '@/data/notes'
 import { useRouter } from 'next/navigation'
+
+import { getAllNotes } from '@/services/notes'
+import { Note } from '@/types/note.type'
 
 const NotesListPage = () => {
   const router = useRouter()
 
   const [search, setSearch] = useState('')
+  const [notes, setNotes] = useState<Note[]>([])
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  const allowSearch = false;
+  const allowFilter = false;
+
+  const fetchData = async () => {
+    setLoading(true)
+    setError('')
+
+    try {
+      const data = await getAllNotes()
+      setNotes(data)
+    } catch (error : any) {
+      setNotes([])
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   const filteredNotes = notes.filter(
     (note) =>
       note.title.toLowerCase().includes(search.toLowerCase()) ||
-      note.description.toLowerCase().includes(search.toLowerCase()) ||
-      note.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase()))
+      note.content.toLowerCase().includes(search.toLowerCase()) // ||
+      // note.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase()))
   )
 
   const pageSize = 6
@@ -41,6 +68,12 @@ const NotesListPage = () => {
 
   const handlePageChange = (page: number) => {
     setQueryParam('page', String(page))
+  }
+
+  const handleNoteDeleted = (deletedNoteId: number) => {
+    setNotes((prevNotes) =>
+      prevNotes.filter((note) => note.id !== deletedNoteId)
+    )
   }
 
   return (
@@ -73,19 +106,38 @@ const NotesListPage = () => {
               placeholder='Search notes...'
               value={search}
               onChange={handleSearchInputChange}
-              className='w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white shadow-sm'
+              className={`w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 
+              ${!allowSearch ? 'opacity-80 bg-gray-50' : 'bg-white shadow-sm'}
+              `}
+              disabled={!allowSearch}
             />
           </div>
-          <Button variant='outline' className='flex items-center gap-2'>
+          <Button variant='outline' className='flex items-center gap-2' disabled={!allowFilter}>
             <Filter className='w-5 h-5' />
             Filter
           </Button>
         </div>
       </AnimatedSection>
 
+      {/* Error State */}
+      {error != '' && (
+        <AnimatedSection delay={0.2}>
+          <div className='bg-red-50 border border-red-200 rounded-lg p-6 mb-6'>
+            <div className='flex items-start gap-3'>
+              <div className='flex-1'>
+                <h3 className='text-red-900 font-semibold mb-1'>Error Loading Notes</h3>
+                <p className='text-red-700 mb-4'>{error}</p>
+              </div>
+            </div>
+          </div>
+        </AnimatedSection>
+      )}
+
       {/* Notes Grid */}
       <AnimatedSection delay={0.2}>
-        {filteredNotes.length === 0 ? (
+        {loading ? (
+          <p className="text-gray-500">Loading notes...</p>
+        ) : !error && filteredNotes.length === 0 ? (
           <div className='text-center text-gray-500 py-16'>
             <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
             <p className='text-lg'>No notes found. Try a different search or add a new note!</p>
@@ -97,9 +149,11 @@ const NotesListPage = () => {
                 key={note.id}
                 id={note.id}
                 title={note.title}
-                description={note.description}
+                description={note.content}
                 createdAt={new Date(note.createdAt)}
-                tags={note.tags}
+                // tags={note.tags}
+                tags={[]}
+                onFinishDelete={handleNoteDeleted}
               />
             ))}
           </div>

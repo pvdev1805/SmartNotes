@@ -5,10 +5,13 @@ import { CircleChevronLeft, Notebook, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { ChangeEvent, FormEvent, useState } from 'react'
 
+import { createNote } from '@/services/notes'
+import { Note } from '@/types/note.type'
+
 const NewNotePage = () => {
   const router = useRouter()
   const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
+  const [content, setContent] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [tagsInput, setTagsInput] = useState('')
 
@@ -17,9 +20,9 @@ const NewNotePage = () => {
     setTitle(newTitle)
   }
 
-  const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    const newDescription = event.target.value
-    setDescription(newDescription)
+  const handleContentChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    const newContent = event.target.value
+    setContent(newContent)
   }
 
   const handleTagsInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -27,21 +30,29 @@ const NewNotePage = () => {
     setTagsInput(newTagsInput)
   }
 
-  const handleSaveNote = (event: FormEvent<HTMLFormElement>) => {
+  const handleSaveNote = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    const updatedTags = tagsInput
-      .split(',')
-      .map((tag) => tag.trim())
-      .filter((tag) => tag)
+    // const updatedTags = tagsInput
+    //   .split(',')
+    //   .map((tag) => tag.trim())
+    //   .filter((tag) => tag)
+    //
+    // setTags(updatedTags)
+    const newNote = {
+      title: title,
+      content: content
+    } as Note
 
-    setTags(updatedTags)
+    try {
+      const createdNote = await createNote(newNote)
 
-    // Save the note to backend or state management
-    console.log('Note saved:', { title, description, tags: updatedTags })
-
-    // Redirect back to notes list
-    router.push('/notes')
+      // Redirect back to notes list
+      const newId = createdNote?.id
+      if (newId) router.push(`/notes/${newId}`)
+    } catch (error : any) {
+      console.log(error.message)
+    }
   }
 
   const handleBack = () => {
@@ -80,22 +91,22 @@ const NewNotePage = () => {
                 />
               </div>
 
-              <div className='mb-2'>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>Tags</label>
-                <input
-                  className='w-full border rounded-lg px-3 py-2'
-                  value={tagsInput}
-                  onChange={handleTagsInputChange}
-                  placeholder='Add tags (comma separated)'
-                />
-              </div>
+              {/*<div className='mb-2'>*/}
+              {/*  <label className='block text-sm font-medium text-gray-700 mb-1'>Tags</label>*/}
+              {/*  <input*/}
+              {/*    className='w-full border rounded-lg px-3 py-2'*/}
+              {/*    value={tagsInput}*/}
+              {/*    onChange={handleTagsInputChange}*/}
+              {/*    placeholder='Add tags (comma separated)'*/}
+              {/*  />*/}
+              {/*</div>*/}
 
               <div className='mb-2'>
                 <label className='block text-sm font-medium text-gray-700 mb-1'>Content</label>
                 <textarea
                   className='w-full border rounded-lg px-3 py-2 h-40 resize-none'
-                  value={description}
-                  onChange={handleDescriptionChange}
+                  value={content}
+                  onChange={handleContentChange}
                   placeholder='Write your note content here...'
                 ></textarea>
               </div>

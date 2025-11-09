@@ -6,17 +6,25 @@ import { Badge } from '@/components/ui/badge'
 import TimeAgo from '@/components/time-ago'
 import { MouseEvent, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-// import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+
+import { deleteNoteById } from '@/services/notes'
+
 interface NoteCardProps {
   id: number
   title: string
   description: string
   createdAt: Date
   tags: string[]
+  onFinishDelete?: (id: number) => void // callback to remove deleted note
 }
 
-const NoteCard = ({ id, title, description, createdAt, tags }: NoteCardProps) => {
+const NoteCard = ({ id, title, description, createdAt, tags, onFinishDelete }: NoteCardProps) => {
+  const router = useRouter()
+
   const [actionsOpen, setActionsOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [confirmationOpen, setConfirmationOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const cancelButtonRef = useRef<HTMLButtonElement>(null)
 
@@ -45,7 +53,7 @@ const NoteCard = ({ id, title, description, createdAt, tags }: NoteCardProps) =>
     event.stopPropagation()
     setActionsOpen(false)
     // Logic to handle edit action, e.g., redirect to edit page
-    // useRouter().push(`/notes/${id}/edit`)
+    router.push(`/notes/${id}`)
     console.log('Edit action triggered for note:', id)
   }
 
@@ -53,8 +61,25 @@ const NoteCard = ({ id, title, description, createdAt, tags }: NoteCardProps) =>
     event.stopPropagation()
     setActionsOpen(false)
     // Logic to handle delete action, e.g., show confirmation dialog
-    // useRouter().push(`/notes/${id}/delete`)
+    setConfirmationOpen(true)
     console.log('Delete action triggered for note:', id)
+  }
+
+  const handleConfirmDelete = async () => {
+    try {
+      setIsDeleting(true)
+
+      await deleteNoteById(id)
+
+      if (onFinishDelete) {
+        onFinishDelete(id)
+      }
+    } catch (error : any) {
+      console.log(error.message)
+    } finally {
+      setIsDeleting(false)
+      setConfirmationOpen(false)
+    }
   }
 
   const handleCancel = (event: MouseEvent<HTMLButtonElement>) => {
@@ -161,6 +186,64 @@ const NoteCard = ({ id, title, description, createdAt, tags }: NoteCardProps) =>
           </>
         )}
         {/* End - Actions Menu */}
+
+        {/* Confirmation Modal */}
+        {confirmationOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 animate-in zoom-in-95 duration-200">
+              {/* Header */}
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                    <Trash className="w-6 h-6 text-red-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">Delete Note {id}</h3>
+                    <p className="text-sm text-gray-500">This action cannot be undone</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-6">
+                <p className="text-gray-700 leading-relaxed">
+                  Are you sure you want to delete note <span className="font-semibold text-gray-900">"{title}"</span>?
+                  This will permanently remove the note from your collection.
+                </p>
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 bg-gray-50 rounded-b-xl flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setConfirmationOpen(false)}
+                  className="px-4 py-2 border-gray-300 text-gray-700 hover:bg-gray-100"
+                  disabled={isDeleting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirmDelete}
+                  className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 flex items-center gap-2"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash className="w-4 h-4" />
+                      Delete Note
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* End - Confirmation Modal */}
       </Card>
     </>
   )
