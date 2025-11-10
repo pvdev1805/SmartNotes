@@ -7,9 +7,12 @@ import { Eye, EyeOff } from 'lucide-react'
 import { ChangeEvent, FormEvent, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/hooks/use-auth'
 
 const RegisterForm = () => {
   const router = useRouter()
+
+  const { register } = useAuth()
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -21,6 +24,7 @@ const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [apiError, setApiError] = useState<string | null>(null)
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
@@ -41,17 +45,29 @@ const RegisterForm = () => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setIsLoading(true)
+    setApiError(null)
+
+    if (formData.password !== formData.confirmPassword) {
+      setApiError('Passwords do not match.')
+      setIsLoading(false)
+      return
+    }
 
     try {
-      // Simulate API call for login
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await register({
+        name: formData.fullName,
+        email: formData.email,
+        password: formData.password
+      })
 
-      router.push('/login') // Redirect to login page after successful registration
-    } catch (error) {
+      // router.push('/login') // Redirect to login page after successful registration
+    } catch (error: any) {
       console.error('Registration failed:', error)
+      const errorMessage = error.response?.data.message || 'Registration failed. Please try again.'
+      setApiError(errorMessage)
     } finally {
       setIsLoading(false)
-      setFormData({ fullName: '', email: '', password: '', confirmPassword: '' }) // Reset form after submission
+      // setFormData({ fullName: '', email: '', password: '', confirmPassword: '' }) // Reset form after submission
     }
   }
 
@@ -70,6 +86,12 @@ const RegisterForm = () => {
 
           {/* Register Form */}
           <form onSubmit={handleSubmit} className='space-y-4'>
+            {apiError && (
+              <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative' role='alert'>
+                <span className='block sm:inline'>{apiError}</span>
+              </div>
+            )}
+
             {/* Full Name Field */}
             <div className='space-y-2 flex flex-col'>
               <label htmlFor='fullName' className='ml-1 mb-1 text-sm font-medium text-gray-700 dark:text-gray-300'>

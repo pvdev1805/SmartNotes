@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import clsx from 'clsx'
 import Link from 'next/link'
+import { useAuth } from '@/hooks/use-auth'
 
 const navLinks = [
   {
@@ -43,6 +44,7 @@ const navLinks = [
 const actionLinks = [
   {
     title: 'Logout',
+    type: 'logout',
     href: '/logout',
     icon: LogOut,
     className: 'hover:bg-red-100 dark:hover:bg-red-700 text-red-600 dark:text-red-400',
@@ -64,8 +66,16 @@ const legalLinks = [
 const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false)
 
+  const { user, isAuthenticated, logout } = useAuth()
+
   const handleOpenMenu = () => {
     setIsOpen(true)
+  }
+
+  const handleLogout = (event: React.MouseEvent) => {
+    event.preventDefault()
+    setIsOpen(false)
+    logout()
   }
 
   return (
@@ -107,11 +117,11 @@ const MobileMenu = () => {
               <div className='flex items-center gap-3 mb-3'>
                 <Avatar className='w-12 h-12'>
                   <AvatarImage src='/avatar.svg' alt='John Smith' />
-                  <AvatarFallback>JS</AvatarFallback>
+                  <AvatarFallback>{user?.name?.charAt(0) || 'G'}</AvatarFallback>
                 </Avatar>
                 <div className=''>
-                  <h3 className='font-medium text-gray-800 dark:text-white'>John Smith</h3>
-                  <p className='text-sm text-gray-600 dark:text-gray-400'>johnsmith@gmail.com</p>
+                  <h3 className='font-medium text-gray-800 dark:text-white'>{user?.name || 'Guest'}</h3>
+                  <p className='text-sm text-gray-600 dark:text-gray-400'>{user?.email || 'guest@example.com'}</p>
                 </div>
               </div>
             </div>
@@ -146,20 +156,37 @@ const MobileMenu = () => {
           {/* Logout */}
           <div className='flex items-center justify-center p-4 border-t border-gray-200 dark:border-gray-700'>
             <div className='w-full'>
-              {actionLinks.map((link) => (
-                <Link
-                  key={link.title}
-                  href={link.href}
-                  className={clsx(
-                    'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200',
-                    link.className
-                  )}
-                  onClick={() => setIsOpen(false)}
-                >
-                  <link.icon className={clsx('w-5 h-5 transition-colors duration-200', link.iconClassName)} />
-                  <span className='text-sm font-medium'>{link.title}</span>
-                </Link>
-              ))}
+              {actionLinks.map((link) => {
+                if (link.type === 'logout') {
+                  return (
+                    <div
+                      key={link.title}
+                      onClick={handleLogout}
+                      className={clsx(
+                        'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200 cursor-pointer',
+                        link.className
+                      )}
+                    >
+                      <link.icon className={clsx('w-5 h-5 transition-colors duration-200', link.iconClassName)} />
+                      <span className='text-sm font-medium'>{link.title}</span>
+                    </div>
+                  )
+                }
+                return (
+                  <Link
+                    key={link.title}
+                    href={link.href}
+                    className={clsx(
+                      'flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-200',
+                      link.className
+                    )}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <link.icon className={clsx('w-5 h-5 transition-colors duration-200', link.iconClassName)} />
+                    <span className='text-sm font-medium'>{link.title}</span>
+                  </Link>
+                )
+              })}
             </div>
           </div>
           {/* End - Logout */}

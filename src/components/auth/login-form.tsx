@@ -7,9 +7,13 @@ import { Eye, EyeOff } from 'lucide-react'
 import { ChangeEvent, FormEvent, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/hooks/use-auth'
+import { login } from '@/services/auth.service'
 
 const LoginForm = () => {
   const router = useRouter()
+
+  const {} = useAuth()
 
   const [formData, setFormData] = useState({
     email: '',
@@ -17,6 +21,8 @@ const LoginForm = () => {
   })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  const [apiError, setApiError] = useState<string | null>(null)
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target
@@ -33,29 +39,20 @@ const LoginForm = () => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setIsLoading(true)
+    setApiError(null)
 
     try {
       // Simulate API call for login
-      // await new Promise((resolve) => setTimeout(resolve, 2000))
+      await login({ email: formData.email, password: formData.password })
 
-      // ------ TEMPORARY LOGIC ONLY, CAN BE OVERWRITTEN IF NEEDED ------ //
-      const res = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, password: formData.password }),
-      })
-      const jsonResponse = await res.json()
-
-      // store JWT with localStorage (or use cookies)
-      localStorage.setItem('jwtToken', jsonResponse.data.accessToken)
-      // ---------------------------------------------------------------- //
-
-      router.push('/')
-    } catch (error) {
+      router.push('/home')
+    } catch (error: any) {
       console.error('Login failed:', error)
+      const errorMessage = error.response?.data.message || 'Login failed. Please try again.'
+      setApiError(errorMessage)
     } finally {
       setIsLoading(false)
-      setFormData({ email: '', password: '' }) // Reset form after submission
+      // setFormData({ email: '', password: '' }) // Reset form after submission
     }
   }
 
