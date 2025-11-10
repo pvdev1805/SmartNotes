@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge'
 
 import { Note } from '@/types/note.type'
 import { getNoteById, updateNote } from '@/services/notes'
+import AutoResizeTextarea from '@/components/notes/auto-resize-textarea'
+import ReactMarkdown from 'react-markdown'
 
 const NoteDetailsPage = () => {
   const router = useRouter()
@@ -163,7 +165,7 @@ const NoteDetailsPage = () => {
                   />
                 </>
               ) : (
-                <h2 className='text-2xl font-semibold text-gray-900 p-2'>{note.title}</h2>
+                <h2 className='text-4xl font-semibold text-blue-900 py-2'>{note.title}</h2>
               )}
             </div>
 
@@ -171,17 +173,22 @@ const NoteDetailsPage = () => {
               {isEditing ? (
                 <>
                   <label className='block text-sm font-medium text-gray-700 mb-1 ml-1'>Content</label>
-                  <textarea
-                    className='border border-gray-300 rounded-md p-2 w-full h-32'
+                  <AutoResizeTextarea
+                    // className='border border-gray-300 rounded-md p-2 w-full h-32'
+                    className='w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base leading-relaxed'
                     value={note.content}
                     onChange={handleContentChange}
+                    minHeight={200}
                   />
                 </>
               ) : (
-                <p className='text-gray-700 p-2'>{note.content}</p>
+                <div className='markdown '>
+                  <ReactMarkdown>{note.content}</ReactMarkdown>
+                </div>
               )}
             </div>
 
+            {/* Tagging Feature */}
             {/*<div className='mb-2'>*/}
             {/*  {isEditing ? (*/}
             {/*    <>*/}

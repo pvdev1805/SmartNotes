@@ -2,8 +2,13 @@ import { Note } from '@/types/note.type'
 
 const baseUrl = 'http://localhost:8080/api/documents/notes'
 
+// Temporary function only
+function getJwtToken() {
+  return localStorage.getItem('jwtToken') || ''
+}
+
 export async function createNote(data: Partial<Note>): Promise<Note | undefined> {
-  const jwtToken = localStorage.getItem('jwtToken') || ''
+  const jwtToken = getJwtToken();
   const url = `${baseUrl}`;
 
   const response = await fetch(url, {
@@ -27,7 +32,7 @@ export async function createNote(data: Partial<Note>): Promise<Note | undefined>
 }
 
 export async function getAllNotes(): Promise<Note[] | []> {
-  const jwtToken = localStorage.getItem('jwtToken') || ''
+  const jwtToken = getJwtToken();
   const url = baseUrl;
 
   const response = await fetch(url, {
@@ -45,7 +50,7 @@ export async function getAllNotes(): Promise<Note[] | []> {
 }
 
 export async function getNoteById(id: number): Promise<Note | undefined> {
-  const jwtToken = localStorage.getItem('jwtToken') || ''
+  const jwtToken = getJwtToken();
   const url = `${baseUrl}/${id}`;
 
   const response = await fetch(url, {
@@ -63,7 +68,7 @@ export async function getNoteById(id: number): Promise<Note | undefined> {
 }
 
 export async function updateNote(id: number, data: Partial<Note>): Promise<Note | undefined> {
-  const jwtToken = localStorage.getItem('jwtToken') || ''
+  const jwtToken = getJwtToken();
   const url = `${baseUrl}/${id}`;
 
   const response = await fetch(url, {
@@ -87,7 +92,7 @@ export async function updateNote(id: number, data: Partial<Note>): Promise<Note 
 }
 
 export async function deleteNoteById(id: number) {
-  const jwtToken = localStorage.getItem('jwtToken') || ''
+  const jwtToken = getJwtToken();
   const url = `${baseUrl}/${id}`;
 
   const response = await fetch(url, {
