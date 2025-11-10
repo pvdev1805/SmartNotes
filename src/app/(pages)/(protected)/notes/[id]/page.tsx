@@ -101,6 +101,14 @@ const NoteDetailsPage = () => {
   //   setTagsInput(newTagsInput)
   // }
 
+  if (loading) {
+    return <>
+      <div className='min-h-screen flex flex-col items-center justify-center'>
+        <p className='text-gray-500 text-xl'>Loading note content...</p>
+      </div>
+    </>
+  }
+
   if (!note) {
     return (
       <>
