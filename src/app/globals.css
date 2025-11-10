@@ -163,3 +163,6 @@
   transform: rotateY(180deg);
   color: #059669;
 }
+.markdown > * {
+  all: revert;
+}
