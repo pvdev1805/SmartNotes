@@ -1,11 +1,11 @@
 export interface Note {
-  id: string
+  id: number
   title: string
   content: string
   createdAt: string
   updatedAt?: string
   tags?: string[]
-  isPinned?: boolean
+  // isPinned?: boolean
 }
 
 export interface NoteList {

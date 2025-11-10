@@ -1,10 +1,20 @@
+'use client'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { ChevronDown } from 'lucide-react'
 import MobileMenu from '@/components/mobile-menu'
 import Logo from '@/components/logo'
+import { useAuth } from '@/hooks/use-auth'
 
 const Header = () => {
+  const { user, isAuthenticated, logout } = useAuth()
+
+  const handleLogout = (event: React.MouseEvent) => {
+    event.preventDefault()
+    logout()
+  }
+
   return (
     <>
       <header className='flex items-center justify-between bg-white dark:bg-gray-800 shadow-md border-b dark:border-gray-700'>
@@ -18,9 +28,9 @@ const Header = () => {
             <DropdownMenuTrigger className='flex items-center gap-2 px-4 py-2 mr-4 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors'>
               <Avatar className='cursor-pointer flex items-center gap-2'>
                 <AvatarImage src='/avatar.svg' alt='John Smith' />
-                <AvatarFallback>JS</AvatarFallback>
+                <AvatarFallback>{user?.name?.charAt(0) || 'G'}</AvatarFallback>
               </Avatar>
-              <span className='text-sm font-medium'>John Smith</span>
+              <span className='text-sm font-medium'>{user?.name || 'Guest'}</span>
               <ChevronDown className='w-4 h-4' />
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -33,8 +43,11 @@ const Header = () => {
                   <span className='text-sm'>Profile</span>
                 </a>
               </DropdownMenuItem>
-              <DropdownMenuItem className='hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors'>
-                <a href='/logout' className='flex items-center gap-2 text-red-600 w-full px-2 py-2'>
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className='hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors'
+              >
+                <div className='flex items-center gap-2 text-red-600 w-full px-2 py-2'>
                   <img
                     src='/logout-icon.svg'
                     alt='Logout Icon'
@@ -44,7 +57,7 @@ const Header = () => {
                     }}
                   />
                   <span className='text-sm'>Logout</span>
-                </a>
+                </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

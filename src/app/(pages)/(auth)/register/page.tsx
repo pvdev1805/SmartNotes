@@ -1,12 +1,25 @@
-import RegisterForm from '@/components/auth/register-form'
-import { Metadata } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Register | SmartNotes',
-  description: 'Create your SmartNotes account'
-}
+import RegisterForm from '@/components/auth/register-form'
+import { useAuth } from '@/hooks/use-auth'
 
 const RegisterPage = () => {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) {
+    return (
+      <>
+        <div className='min-h-screen flex items-center justify-center bg-transparent p-4'>
+          <div className='text-gray-500'>Loading...</div>
+        </div>
+      </>
+    )
+  }
+
+  if (isAuthenticated) {
+    return null
+  }
+
   return (
     <>
       <div className='min-h-screen flex items-center justify-center bg-transparent p-4'>

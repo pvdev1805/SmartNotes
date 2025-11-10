@@ -31,6 +31,12 @@ const NoteDetailsPage = () => {
   }
 
   const handleCancelEdit = () => {
+    if (note) {
+      setTitle(note.title)
+      setDescription(note.description)
+      setTagsInput(note.tags.join(','))
+    }
+
     setIsEditing(false)
   }
 

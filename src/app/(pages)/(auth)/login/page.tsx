@@ -1,12 +1,25 @@
-import LoginForm from '@/components/auth/login-form'
-import { Metadata } from 'next'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Login | SmartNotes',
-  description: 'Sign in to your SmartNotes account'
-}
+import LoginForm from '@/components/auth/login-form'
+import { useAuth } from '@/hooks/use-auth'
 
 const LoginPage = () => {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) {
+    return (
+      <>
+        <div className='min-h-screen flex items-center justify-center bg-transparent p-4'>
+          <div className='text-gray-500'>Loading...</div>
+        </div>
+      </>
+    )
+  }
+
+  if (isAuthenticated) {
+    return null
+  }
+
   return (
     <>
       <div className='min-h-screen flex items-center justify-center bg-transparent p-4'>
