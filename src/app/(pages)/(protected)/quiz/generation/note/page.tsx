@@ -7,8 +7,9 @@ import { FileText, BookOpen, Sparkles, UploadCloud, CircleChevronLeft, Notebook,
 // import { notes } from '@/data/notes'
 import { useRouter } from 'next/navigation'
 import { Note } from '@/types/note.type'
-import { getAllNotes, generateSingleQuiz } from '@/services/quiz.service'
+import { generateSingleQuiz } from '@/services/quiz.service'
 import AnimatedSection from '@/components/landing/animated-section'
+import { getAllNotes } from '@/services/note.service'
 
 // const mockNotes = notes.map((note) => ({ id: note.id, title: note.title }))
 
@@ -33,7 +34,6 @@ const NoteSelectionPage = () => {
 
     try {
       const data = await getAllNotes()
-      console.log(data)
       setNotes(data)
     } catch (error : any) {
       setNotes([])
@@ -83,7 +83,7 @@ const NoteSelectionPage = () => {
 
     if (!selectedNoteId) return
     try {
-      const updatedNote = await generateSingleQuiz(selectedNoteId)
+      const quiz = await generateSingleQuiz(selectedNoteId)
       router.push('/quiz')
     } catch (error : any) {
       setError(error.message)

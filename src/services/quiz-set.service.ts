@@ -1,44 +1,25 @@
+import apiClient from '@/apis/api-client'
+import { ApiResponse } from '@/types/auth.type'
 import { QuizSet } from '@/types/quiz-set.type'
 
-const baseUrl = 'http://localhost:8080/api/quiz-sets'
+const QUIZ_SET_BASE_API = '/quiz-sets'
 
-// Temporary function only
-function getJwtToken() {
-  return localStorage.getItem('jwtToken') || ''
+export const getDefaultQuizSet = async (): Promise<QuizSet> => {
+  const response = await apiClient.get(`${QUIZ_SET_BASE_API}/default`)
+  const apiRes: ApiResponse<QuizSet> = response.data
+
+  if (!apiRes.data && apiRes.code != 1000) {
+    throw new Error(`Failed to update data: ${apiRes.message}`)
+  }
+  return apiRes.data
 }
 
-export async function getDefaultQuizSet(): Promise<QuizSet | undefined> {
-  const jwtToken = getJwtToken();
-  const url = `${baseUrl}/default`;
+export const getAllQuizSets = async (): Promise<QuizSet[]> => {
+  const response = await apiClient.get(`${QUIZ_SET_BASE_API}`)
+  const apiRes: ApiResponse<QuizSet[]> = response.data
 
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${jwtToken}`
-    }
-  })
-
-  // Handle response
-  const jsonResponse = await response.json()
-  if (!response.ok) {
-    throw new Error(`Failed to fetch data: ${jsonResponse.message}`)
+  if (!apiRes.data && apiRes.code != 1000) {
+    throw new Error(`Failed to update data: ${apiRes.message}`)
   }
-  return jsonResponse.data as QuizSet
-}
-
-export async function getAllQuizSets(): Promise<QuizSet[] | []> {
-  const jwtToken = getJwtToken();
-  const url = baseUrl;
-
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${jwtToken}`
-    }
-  })
-
-  // Handle response
-  const jsonResponse = await response.json()
-  if (!response.ok) {
-    throw new Error(`Failed to fetch data: ${jsonResponse.message}`)
-  }
-  return jsonResponse.data as QuizSet[]
+  return apiRes.data
 }
