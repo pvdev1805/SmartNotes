@@ -72,7 +72,7 @@ export const updateAttemptProgress = async (quizId : number, attemptId : number,
 }
 
 export const finishAttempt = async (quizId : number, attemptId : number): Promise<QuizAttempt> => {
-  const response = await apiClient.get(`${QUIZ_BASE_API}/${quizId}/attempts/${attemptId}/answer`)
+  const response = await apiClient.post(`${QUIZ_BASE_API}/${quizId}/attempts/${attemptId}/answer`)
   const apiRes: ApiResponse<QuizAttempt> = response.data
 
   if (!apiRes.data && apiRes.code != 1000) {

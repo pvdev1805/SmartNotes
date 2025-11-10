@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { AttemptDetail, QuizAttempt } from '@/types/quiz-attempt'
 import { getNoteById, updateNote } from '@/services/note.service'
 import { finishAttempt, getQuizAttempt, updateAttemptProgress } from '@/services/quiz.service'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
+import { CircleChevronLeft } from 'lucide-react'
 
 // const mockQuestions = [
 //   {
@@ -131,6 +132,8 @@ interface Question {
 }
 
 const QuizQuestionPage = () => {
+  const router = useRouter()
+
   const { quizId, attemptId } = useParams()
   const [attempt, setAttempt] = useState<QuizAttempt | null>();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -180,6 +183,10 @@ const QuizQuestionPage = () => {
   useEffect(() => {
     fetchData(Number(quizId), Number(attemptId));
   }, [quizId])
+
+  const handleBackToQuiz = () => {
+    router.push(`/quiz/${quizId}`)
+  }
 
   const handleSelect = (optionKey: string) => {
     setAnswers((prev) => {
@@ -294,7 +301,13 @@ const QuizQuestionPage = () => {
                 </div>
               ))}
             </div>
-            <Button onClick={() => window.location.reload()}>Try Again</Button>
+
+            <div className='flex items-center justify-between mb-4'>
+              <Button onClick={() => window.location.reload()}>Try Again</Button>
+              <Button variant={'outline'} onClick={handleBackToQuiz} className='flex items-center'>
+                Back to Quiz
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -303,7 +316,7 @@ const QuizQuestionPage = () => {
 
   if (loading) {
     return (
-      <p className="text-gray-500">Loading notes...</p>
+      <p className="text-gray-500">Loading quiz...</p>
     )
   }
 
