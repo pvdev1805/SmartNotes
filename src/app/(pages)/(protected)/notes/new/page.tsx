@@ -5,7 +5,7 @@ import { CircleChevronLeft, Notebook, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { ChangeEvent, FormEvent, useState } from 'react'
 
-import { createNote } from '@/services/notes.service'
+import { createNote } from '@/services/note.service'
 import { Note } from '@/types/note.type'
 import AnimatedSection from '@/components/landing/animated-section'
 import AutoResizeTextarea from '@/components/notes/auto-resize-textarea'

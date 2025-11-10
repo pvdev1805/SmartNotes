@@ -8,7 +8,7 @@ import { MouseEvent, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { deleteNoteById } from '@/services/notes.service'
+import { deleteNoteById } from '@/services/note.service'
 
 interface NoteCardProps {
   id: number
