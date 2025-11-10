@@ -4,66 +4,109 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowLeft, CircleChevronLeft, Edit, Save, Tag } from 'lucide-react'
 
-// Dummy notes data
-import { notes } from '@/data/notes'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
+
+import { Note } from '@/types/note.type'
+import { getNoteById, updateNote } from '@/services/note.service'
+import AutoResizeTextarea from '@/components/notes/auto-resize-textarea'
+import ReactMarkdown from 'react-markdown'
 
 const NoteDetailsPage = () => {
   const router = useRouter()
   const { id } = useParams()
-  const note = notes.find((note) => note.id === Number(id))
+  const [note, setNote] = useState<Note | null>()
+  // const [tags, setTags] = useState(note?.tags || [])
+  // const [tagsInput, setTagsInput] = useState(tags.join(','))
 
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
-  const [title, setTitle] = useState(note?.title || '')
-  const [description, setDescription] = useState(note?.description || '')
-  const [tags, setTags] = useState(note?.tags || [])
-  const [tagsInput, setTagsInput] = useState(tags.join(','))
+
+  const fetchData = async (id: number) => {
+    setLoading(true)
+    setError('')
+
+    try {
+      const data = await getNoteById(id)
+      setNote(data)
+    } catch (error : any) {
+      setNote(null)
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData(Number(id));
+  }, [id])
 
   const handleBackToNotes = () => {
     router.push('/notes')
   }
 
   const handleEditNote = () => {
-    setTagsInput(tags.join(','))
+    // setTagsInput(tags.join(','))
 
     setIsEditing(true)
   }
 
   const handleCancelEdit = () => {
-    if (note) {
-      setTitle(note.title)
-      setDescription(note.description)
-      setTagsInput(note.tags.join(','))
-    }
-
     setIsEditing(false)
   }
 
-  const handleSaveNote = () => {
-    const updatedTags = tagsInput
-      .split(',')
-      .map((tag) => tag.trim())
-      .filter((tag) => tag)
+  const handleSaveNote = async () => {
+    setLoading(true)
+    setIsEditing(true)
 
-    setTags(updatedTags)
+    // const updatedTags = tagsInput
+    //   .split(',')
+    //   .map((tag) => tag.trim())
+    //   .filter((tag) => tag)
+    //
+    // setTags(updatedTags)
 
-    setIsEditing(false)
+    if (!note) return
+    try {
+      const updatedNote = await updateNote(note.id, {
+        title: note.title,
+        content: note.content
+      })
+      setNote(updatedNote)
+    } catch (error : any) {
+      setError(error.message)
+    } finally {
+      setLoading(false)
+      setIsEditing(false)
+    }
   }
 
   const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (!note) return
+
     const newTitle = event.target.value
-    setTitle(newTitle)
+    setNote({...note, title: newTitle })
   }
 
-  const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    const newDescription = event.target.value
-    setDescription(newDescription)
+  const handleContentChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    if (!note) return
+
+    const newContent = event.target.value
+    setNote({...note, content: newContent })
   }
 
-  const handleTagsInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const newTagsInput = event.target.value
-    setTagsInput(newTagsInput)
+  // const handleTagsInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+  //   const newTagsInput = event.target.value
+  //   setTagsInput(newTagsInput)
+  // }
+
+  if (loading) {
+    return <>
+      <div className='min-h-screen flex flex-col items-center justify-center'>
+        <p className='text-gray-500 text-xl'>Loading note content...</p>
+      </div>
+    </>
   }
 
   if (!note) {
@@ -125,56 +168,61 @@ const NoteDetailsPage = () => {
                   <label className='block text-sm font-medium text-gray-700 mb-1 ml-1'>Title</label>
                   <input
                     className='border border-gray-300 rounded-md p-2 w-full'
-                    value={title}
+                    value={note.title}
                     onChange={handleTitleChange}
                   />
                 </>
               ) : (
-                <h2 className='text-2xl font-semibold text-gray-900 p-2'>{title}</h2>
+                <h2 className='text-4xl font-semibold text-blue-900 py-2'>{note.title}</h2>
               )}
             </div>
 
             <div className='mb-2'>
               {isEditing ? (
                 <>
-                  <label className='block text-sm font-medium text-gray-700 mb-1 ml-1'>Description</label>
-                  <textarea
-                    className='border border-gray-300 rounded-md p-2 w-full h-32'
-                    value={description}
-                    onChange={handleDescriptionChange}
+                  <label className='block text-sm font-medium text-gray-700 mb-1 ml-1'>Content</label>
+                  <AutoResizeTextarea
+                    // className='border border-gray-300 rounded-md p-2 w-full h-32'
+                    className='w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 text-base leading-relaxed'
+                    value={note.content}
+                    onChange={handleContentChange}
+                    minHeight={200}
                   />
                 </>
               ) : (
-                <p className='text-gray-700 p-2'>{description}</p>
-              )}
-            </div>
-
-            <div className='mb-2'>
-              {isEditing ? (
-                <>
-                  <label className='block text-sm font-medium text-gray-700 mb-1 ml-1'>Tags</label>
-                  <input
-                    className='border border-gray-300 rounded-md p-2 w-full'
-                    value={tagsInput}
-                    onChange={handleTagsInputChange}
-                    placeholder='Enter tags separated by commas (e.g., tag1,tag2)'
-                  />
-                </>
-              ) : (
-                <div className='mb-2'>
-                  <div className='flex items-center gap-2 p-2'>
-                    <Tag className='w-4 h-4 text-muted-foreground' />
-                    <div className='flex gap-2'>
-                      {tags.map((tag) => (
-                        <Badge key={tag} variant={'secondary'} className='text-xs'>
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
+                <div className='markdown '>
+                  <ReactMarkdown>{note.content}</ReactMarkdown>
                 </div>
               )}
             </div>
+
+            {/* Tagging Feature */}
+            {/*<div className='mb-2'>*/}
+            {/*  {isEditing ? (*/}
+            {/*    <>*/}
+            {/*      <label className='block text-sm font-medium text-gray-700 mb-1 ml-1'>Tags</label>*/}
+            {/*      <input*/}
+            {/*        className='border border-gray-300 rounded-md p-2 w-full'*/}
+            {/*        value={tagsInput}*/}
+            {/*        onChange={handleTagsInputChange}*/}
+            {/*        placeholder='Enter tags separated by commas (e.g., tag1,tag2)'*/}
+            {/*      />*/}
+            {/*    </>*/}
+            {/*  ) : (*/}
+            {/*    <div className='mb-2'>*/}
+            {/*      <div className='flex items-center gap-2 p-2'>*/}
+            {/*        <Tag className='w-4 h-4 text-muted-foreground' />*/}
+            {/*        <div className='flex gap-2'>*/}
+            {/*          {tags.map((tag) => (*/}
+            {/*            <Badge key={tag} variant={'secondary'} className='text-xs'>*/}
+            {/*              {tag}*/}
+            {/*            </Badge>*/}
+            {/*          ))}*/}
+            {/*        </div>*/}
+            {/*      </div>*/}
+            {/*    </div>*/}
+            {/*  )}*/}
+            {/*</div>*/}
 
             <div className='mb-2'>
               <div className='mt-6 text-sm text-gray-400'>

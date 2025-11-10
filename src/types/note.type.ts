@@ -8,6 +8,11 @@ export interface Note {
   // isPinned?: boolean
 }
 
+export interface NoteUpdateRequest {
+  title: string
+  content: string
+}
+
 export interface NoteList {
   notes: Note[]
   pagination: {
