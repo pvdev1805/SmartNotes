@@ -79,6 +79,7 @@ const NotesListPage = () => {
     setNotes((prevNotes) =>
       prevNotes.filter((note) => note.id !== deletedNoteId)
     )
+    router.refresh()
   }
 
   return (

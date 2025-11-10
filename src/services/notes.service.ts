@@ -1,110 +1,54 @@
-import { Note } from '@/types/note.type'
+import { Note, NoteUpdateRequest } from '@/types/note.type'
+import apiClient from '@/apis/api-client'
+import { ApiResponse, UserResponse } from '@/types/auth.type'
 
-const baseUrl = 'http://localhost:8080/api/documents/notes'
+const NOTE_BASE_API = '/documents/notes'
 
-// Temporary function only
-function getJwtToken() {
-  return localStorage.getItem('jwtToken') || ''
-}
+export const createNote = async (request: NoteUpdateRequest): Promise<Note> => {
+  const response = await apiClient.post(`${NOTE_BASE_API}`,  request)
+  const apiRes: ApiResponse<Note> = response.data
 
-export async function createNote(data: Partial<Note>): Promise<Note | undefined> {
-  const jwtToken = getJwtToken();
-  const url = `${baseUrl}`;
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${jwtToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      title: data.title,
-      content: data.content
-    })
-  })
-
-  // Handle response
-  const jsonResponse = await response.json()
-  if (!response.ok) {
-    throw new Error(`Failed to create new note: ${jsonResponse.message}`)
+  if (!apiRes.data && apiRes.code != 1000) {
+    throw new Error(`Failed to update data: ${apiRes.message}`)
   }
-  return jsonResponse.data as Note
+  return apiRes.data
 }
 
-export async function getAllNotes(): Promise<Note[] | []> {
-  const jwtToken = getJwtToken();
-  const url = baseUrl;
+export const getAllNotes = async (): Promise<Note[]> => {
+  const response = await apiClient.get(`${NOTE_BASE_API}`)
+  const apiRes: ApiResponse<Note[]> = response.data
 
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${jwtToken}`
-    }
-  })
-
-  // Handle response
-  const jsonResponse = await response.json()
-  if (!response.ok) {
-    throw new Error(`Failed to fetch data: ${jsonResponse.message}`)
+  if (!apiRes.data && apiRes.code != 1000) {
+    throw new Error(`Failed to update data: ${apiRes.message}`)
   }
-  return jsonResponse.data as Note[]
+  return apiRes.data
 }
 
-export async function getNoteById(id: number): Promise<Note | undefined> {
-  const jwtToken = getJwtToken();
-  const url = `${baseUrl}/${id}`;
+export const getNoteById = async (id: number): Promise<Note> => {
+  const response = await apiClient.get(`${NOTE_BASE_API}/${id}`)
+  const apiRes: ApiResponse<Note> = response.data
 
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${jwtToken}`
-    }
-  })
-
-  // Handle response
-  const jsonResponse = await response.json()
-  if (!response.ok) {
-    throw new Error(`Failed to fetch data: ${jsonResponse.message}`)
+  if (!apiRes.data && apiRes.code != 1000) {
+    throw new Error(`Failed to update data: ${apiRes.message}`)
   }
-  return jsonResponse.data as Note
+  return apiRes.data
 }
 
-export async function updateNote(id: number, data: Partial<Note>): Promise<Note | undefined> {
-  const jwtToken = getJwtToken();
-  const url = `${baseUrl}/${id}`;
+export const updateNote = async (id: number, request: NoteUpdateRequest): Promise<Note> => {
+  const response = await apiClient.patch(`${NOTE_BASE_API}/${id}`, request)
+  const apiRes: ApiResponse<Note> = response.data
 
-  const response = await fetch(url, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${jwtToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      title: data.title,
-      content: data.content
-    })
-  })
-
-  // Handle response
-  const jsonResponse = await response.json()
-  if (!response.ok) {
-    throw new Error(`Failed to update data: ${jsonResponse.message}`)
+  if (!apiRes.data && apiRes.code != 1000) {
+    throw new Error(`Failed to update data: ${apiRes.message}`)
   }
-  return jsonResponse.data as Note
+  return apiRes.data
 }
 
-export async function deleteNoteById(id: number) {
-  const jwtToken = getJwtToken();
-  const url = `${baseUrl}/${id}`;
+export const deleteNoteById = async (id: number) => {
+  const response = await apiClient.delete(`${NOTE_BASE_API}/${id}`)
+  const apiRes: ApiResponse<Note> = response.data
 
-  const response = await fetch(url, {
-    method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${jwtToken}`
-    }
-  })
-
-  // Handle response
-  const jsonResponse = await response.json()
-  if (!response.ok) {
-    throw new Error(`Failed to delete data: ${jsonResponse.message}`)
+  if (!apiRes.data && apiRes.code != 1000) {
+    throw new Error(`Failed to update data: ${apiRes.message}`)
   }
 }
