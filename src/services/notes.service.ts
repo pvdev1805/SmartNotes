@@ -72,7 +72,7 @@ export async function updateNote(id: number, data: Partial<Note>): Promise<Note 
   const url = `${baseUrl}/${id}`;
 
   const response = await fetch(url, {
-    method: 'PUT',
+    method: 'PATCH',
     headers: {
       Authorization: `Bearer ${jwtToken}`,
       'Content-Type': 'application/json',

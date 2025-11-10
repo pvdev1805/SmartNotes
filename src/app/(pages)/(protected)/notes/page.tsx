@@ -10,7 +10,7 @@ import NoteCard from '@/components/notes/note-card'
 
 import { useRouter } from 'next/navigation'
 
-import { getAllNotes } from '@/services/notes'
+import { getAllNotes } from '@/services/notes.service'
 import { Note } from '@/types/note.type'
 
 const NotesListPage = () => {

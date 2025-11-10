@@ -8,7 +8,7 @@ import { ChangeEvent, useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 
 import { Note } from '@/types/note.type'
-import { getNoteById, updateNote } from '@/services/notes'
+import { getNoteById, updateNote } from '@/services/notes.service'
 import AutoResizeTextarea from '@/components/notes/auto-resize-textarea'
 import ReactMarkdown from 'react-markdown'
 
