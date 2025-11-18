@@ -1,3 +1,4 @@
+import { RefreshTokenResponse } from '@/types/auth.type'
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { deleteCookie, getCookie, setCookie } from 'cookies-next'
 
@@ -49,16 +50,6 @@ apiClient.interceptors.request.use(
   }
 )
 
-// apiClient.interceptors.response.use(
-//   (response) => response,
-//   (error) => {
-//     if (error.response?.status === 401) {
-//       console.error('Unauthorized! Please log in again.')
-//     }
-//     return Promise.reject(error)
-//   }
-// )
-
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -107,16 +98,7 @@ apiClient.interceptors.response.use(
         refreshToken: refreshToken
       })
 
-      const data = (
-        refreshResponse.data as {
-          code: number
-          message: string
-          data: {
-            accessToken: string
-            refreshToken: string
-          }
-        }
-      ).data
+      const data = (refreshResponse.data as RefreshTokenResponse).data
 
       console.log('Refresh token response data:', data)
 
