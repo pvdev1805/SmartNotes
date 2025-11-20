@@ -2,10 +2,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 
 import { flashcards as flashcardsData } from '@/data/flashcards'
-import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
 import Flashcard from '@/components/flashcards/flashcard'
 import useQueryConfig from '@/hooks/use-query-config'
@@ -13,6 +11,9 @@ import useUpdateQueryParam from '@/hooks/use-update-query-param'
 import { BookText, Diamond, Notebook, Plus, Search } from 'lucide-react'
 import { Flashcard as FlashcardType } from '@/types/flashcard.type'
 import Link from 'next/link'
+import FadeInSection from '@/components/animations/fade-in-section'
+import AnimatedList from '@/components/animations/animated-list'
+import FadeInItem from '@/components/animations/fade-in-item'
 
 const PAGE_SIZE = 6
 
@@ -87,7 +88,7 @@ const FlashcardsPage = () => {
   return (
     <div className='min-h-screen flex flex-col items-center bg-gray-50 px-4 py-4'>
       <div className='w-full'>
-        <AnimatedSection delay={0}>
+        <FadeInSection>
           <div className='flex items-center justify-between mb-4'>
             <div className='flex flex-col'>
               <h1 className='text-2xl font-bold text-gray-900'>
@@ -112,10 +113,10 @@ const FlashcardsPage = () => {
               </Button>
             </div>
           </div>
-        </AnimatedSection>
+        </FadeInSection>
 
         {/* Search Input */}
-        <AnimatedSection delay={0.1}>
+        <FadeInSection>
           <div className='flex items-center mb-6'>
             <div className='relative'>
               <Search className='absolute left-3 top-3 text-gray-400 w-5 h-5' />
@@ -128,32 +129,34 @@ const FlashcardsPage = () => {
               />
             </div>
           </div>
-        </AnimatedSection>
+        </FadeInSection>
 
-        <AnimatedSection delay={0.2}>
+        <FadeInSection>
           {paginatedFlashcards.length === 0 ? (
             <div className='text-center text-gray-500 py-16'>
               <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
               <p className='text-lg'>No flashcards found.</p>
             </div>
           ) : (
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+            <AnimatedList className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
               {paginatedFlashcards.map((card) => (
-                <Link key={card.id} href={`/flashcards/${card.id}`}>
-                  <Flashcard
-                    id={card.id}
-                    question={card.question}
-                    answer={card.answer}
-                    collections={card.collections}
-                  />
-                </Link>
+                <FadeInItem key={card.id}>
+                  <Link href={`/flashcards/${card.id}`}>
+                    <Flashcard
+                      id={card.id}
+                      question={card.question}
+                      answer={card.answer}
+                      collections={card.collections}
+                    />
+                  </Link>
+                </FadeInItem>
               ))}
-            </div>
+            </AnimatedList>
           )}
-        </AnimatedSection>
+        </FadeInSection>
 
         {/* Pagination */}
-        <AnimatedSection delay={0.2}>
+        <FadeInSection>
           {filteredFlashcards.length > 0 && (
             <Pagination
               total={filteredFlashcards.length}
@@ -162,7 +165,7 @@ const FlashcardsPage = () => {
               onPageChange={handlePageChange}
             />
           )}
-        </AnimatedSection>
+        </FadeInSection>
       </div>
     </div>
   )
