@@ -1,6 +1,8 @@
 'use client'
 
-import AnimatedSection from '@/components/landing/animated-section'
+import AnimatedList from '@/components/animations/animated-list'
+import FadeInItem from '@/components/animations/fade-in-item'
+import FadeInSection from '@/components/animations/fade-in-section'
 import Pagination from '@/components/pagination'
 import PDFItem from '@/components/PDFs/PDFItem'
 import { Button } from '@/components/ui/button'
@@ -46,7 +48,7 @@ const PDFListPage = () => {
   return (
     <div className='min-h-screen bg-gray-50 px-4 py-4 overflow-hidden'>
       {/* Header */}
-      <AnimatedSection delay={0}>
+      <FadeInSection>
         <div className='flex items-center justify-between mb-8'>
           <h1 className='text-3xl font-bold text-gray-900 flex items-center gap-2'>
             <BookOpenText className='w-7 h-7 text-blue-600' />
@@ -60,11 +62,11 @@ const PDFListPage = () => {
             New PDF
           </Button>
         </div>
-      </AnimatedSection>
+      </FadeInSection>
       {/* End - Header */}
 
       {/* Search & Filter */}
-      <AnimatedSection delay={0.1}>
+      <FadeInSection>
         <div className='flex items-center gap-4 mb-6'>
           <div className='relative'>
             <Search className='absolute left-3 top-3 text-gray-400 w-5 h-5' />
@@ -81,33 +83,34 @@ const PDFListPage = () => {
             Filter
           </Button>
         </div>
-      </AnimatedSection>
+      </FadeInSection>
       {/* End - Search & Filter */}
 
       {/* PDF Grid */}
-      <AnimatedSection delay={0.2}>
+      <FadeInSection>
         {filteredPdfs.length === 0 ? (
           <div className='text-center text-gray-500 py-16'>
             <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
             <p className='text-lg'>No PDFs found. Try a different search or add a new PDF!</p>
           </div>
         ) : (
-          <div className='flex items-center flex-wrap gap-4'>
+          <AnimatedList className='flex items-center flex-wrap gap-4'>
             {paginatedPdfs.map((pdf) => (
-              <PDFItem
-                key={pdf.id}
-                fileName={pdf.fileName}
-                size={pdf.size}
-                downloadUrl={pdf.downloadUrl}
-                createdAt={pdf.uploadedAt}
-              />
+              <FadeInItem key={pdf.id}>
+                <PDFItem
+                  fileName={pdf.fileName}
+                  size={pdf.size}
+                  downloadUrl={pdf.downloadUrl}
+                  createdAt={pdf.uploadedAt}
+                />
+              </FadeInItem>
             ))}
-          </div>
+          </AnimatedList>
         )}
-      </AnimatedSection>
+      </FadeInSection>
 
       {/* Pagination */}
-      <AnimatedSection delay={0.2}>
+      <FadeInSection>
         {filteredPdfs.length > pageSize && (
           <Pagination
             total={filteredPdfs.length}
@@ -116,7 +119,7 @@ const PDFListPage = () => {
             onPageChange={handlePageChange}
           />
         )}
-      </AnimatedSection>
+      </FadeInSection>
       {/* End - Pagination */}
     </div>
   )
