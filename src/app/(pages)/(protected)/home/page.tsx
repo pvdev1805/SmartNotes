@@ -1,15 +1,13 @@
-'use client'
-
+import AnimatedList from '@/components/animations/animated-list'
+import FadeInItem from '@/components/animations/fade-in-item'
 import AnimatedSection from '@/components/landing/animated-section'
 import NoteCard from '@/components/notes/note-card'
 import PDFItem from '@/components/PDFs/PDFItem'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { pdfs } from '@/data/pdfs'
-import { useAuth } from '@/hooks/use-auth'
 import { BookOpen, ChevronRight, Edit, FileText, Plus, Tag, Target, Trash, Upload, Zap } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 // Mock data for stats
 const statsData = [
@@ -77,8 +75,6 @@ const recentNotes = [
 const uploadedPDFs = pdfs
 
 const Home = () => {
-  const router = useRouter()
-
   return (
     <>
       <div className='min-h-screen bg-gray-50 px-4 py-4 space-y-8 overflow-hidden'>
@@ -92,13 +88,12 @@ const Home = () => {
               </h1>
               <p className='mt-1 text-sm text-muted-foreground'>Ready to continue your learning journey?</p>
             </div>
-            <Button
-              className='bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600  hover:to-purple-600 flex'
-              onClick={() => router.push('/notes/new')}
-            >
-              <Plus className='w-4 h-4' />
-              New Note
-            </Button>
+            <Link href='/notes/new'>
+              <Button className='bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 flex gap-2'>
+                <Plus className='w-4 h-4' />
+                New Note
+              </Button>
+            </Link>
           </section>
         </AnimatedSection>
         {/* End - Header Section */}
@@ -140,18 +135,19 @@ const Home = () => {
               </Link>
             </div>
 
-            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+            <AnimatedList className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
               {recentNotes.map((note) => (
-                <NoteCard
-                  key={note.id}
-                  id={note.id}
-                  title={note.title}
-                  description={note.description}
-                  createdAt={note.createdAt}
-                  tags={note.tags}
-                />
+                <FadeInItem key={note.id}>
+                  <NoteCard
+                    id={note.id}
+                    title={note.title}
+                    description={note.description}
+                    createdAt={note.createdAt}
+                    tags={note.tags}
+                  />
+                </FadeInItem>
               ))}
-            </div>
+            </AnimatedList>
           </section>
         </AnimatedSection>
         {/* End - Recent Notes Section */}
@@ -173,17 +169,18 @@ const Home = () => {
                   <p className='text-lg'>No PDFs uploaded yet.</p>
                 </div>
               ) : (
-                <div className='flex items-center flex-wrap gap-4'>
+                <AnimatedList className='flex items-center flex-wrap gap-4'>
                   {uploadedPDFs.map((pdf) => (
-                    <PDFItem
-                      key={pdf.id}
-                      fileName={pdf.fileName}
-                      size={pdf.size}
-                      downloadUrl={pdf.downloadUrl}
-                      createdAt={pdf.uploadedAt}
-                    />
+                    <FadeInItem key={pdf.id}>
+                      <PDFItem
+                        fileName={pdf.fileName}
+                        size={pdf.size}
+                        downloadUrl={pdf.downloadUrl}
+                        createdAt={pdf.uploadedAt}
+                      />
+                    </FadeInItem>
                   ))}
-                </div>
+                </AnimatedList>
               )}
             </div>
           </section>
