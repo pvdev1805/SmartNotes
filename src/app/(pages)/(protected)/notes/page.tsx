@@ -14,25 +14,29 @@ import { Note } from '@/types/note.type'
 import FadeInSection from '@/components/animations/fade-in-section'
 import AnimatedList from '@/components/animations/animated-list'
 import FadeInItem from '@/components/animations/fade-in-item'
+import { PageInfo } from '@/types/util.type'
 
 const NotesListPage = () => {
   const router = useRouter()
 
   const [search, setSearch] = useState('')
   const [notes, setNotes] = useState<Note[]>([])
+  const [page, setPage] = useState<PageInfo>({ currentPage: 1, pageSize: 6, totalPages: 0, totalElements: 0 })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
   const allowSearch = false
   const allowFilter = false
 
-  const fetchData = async () => {
+  const fetchData = async (pageNum: number) => {
     setLoading(true)
     setError('')
 
     try {
-      const data = await getAllNotes()
-      setNotes(data)
+      const data = await getAllNotes(pageNum, page.pageSize)
+      setNotes(data.pageData)
+      setPage(data.pageInfo)
+      console.log(data.pageInfo)
     } catch (error: any) {
       setNotes([])
       setError(error.message)
@@ -42,7 +46,7 @@ const NotesListPage = () => {
   }
 
   useEffect(() => {
-    fetchData()
+    fetchData(page.currentPage)
   }, [])
 
   const filteredNotes = notes.filter(
@@ -73,8 +77,13 @@ const NotesListPage = () => {
     }
   }
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = (pageNumber: number) => {
+    setPage((prevState) => ({
+      ...prevState,
+      currentPage: pageNumber
+    }))
     setQueryParam('page', String(page))
+    fetchData(pageNumber)
   }
 
   const handleNoteDeleted = (deletedNoteId: number) => {
@@ -169,14 +178,21 @@ const NotesListPage = () => {
 
       {/* Pagination */}
       <FadeInSection>
-        {filteredNotes.length > pageSize && (
-          <Pagination
-            total={filteredNotes.length}
-            pageSize={pageSize}
-            currentPage={currentPage}
-            onPageChange={handlePageChange}
-          />
-        )}
+        <Pagination
+          total={page.totalElements}
+          pageSize={page.pageSize}
+          currentPage={page.currentPage}
+          onPageChange={handlePageChange}
+        />
+
+        {/*{filteredNotes.length > pageSize && (*/}
+        {/*  <Pagination*/}
+        {/*    total={filteredNotes.length}*/}
+        {/*    pageSize={pageSize}*/}
+        {/*    currentPage={currentPage}*/}
+        {/*    onPageChange={handlePageChange}*/}
+        {/*  />*/}
+        {/*)}*/}
       </FadeInSection>
       {/* End - Pagination */}
     </div>

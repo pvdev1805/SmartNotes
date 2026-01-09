@@ -1,3 +1,5 @@
+import { PageInfo } from '@/types/util.type'
+
 export interface Note {
   id: number
   title: string
@@ -13,14 +15,19 @@ export interface NoteUpdateRequest {
   content: string
 }
 
-export interface NoteList {
-  notes: Note[]
-  pagination: {
-    currentPage: number
-    limit: number
-    totalPages: number
-  }
+export interface NotePage {
+  pageData: Note[]
+  pageInfo: PageInfo
 }
+
+// export interface NoteList {
+//   notes: Note[]
+//   pagination: {
+//     currentPage: number
+//     limit: number
+//     totalPages: number
+//   }
+// }
 
 export interface NoteListConfig {
   page?: number | string
