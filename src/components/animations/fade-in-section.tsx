@@ -1,31 +1,24 @@
 'use client'
+
 import { motion } from 'framer-motion'
 
-interface AnimatedSectionProps {
+interface FadeInSectionProps {
   children: React.ReactNode
   delay?: number
   className?: string
 }
 
-const AnimatedSection = ({ children, delay = 0, className = '' }: AnimatedSectionProps) => {
+const FadeInSection = ({ children, delay = 0, className = '' }: FadeInSectionProps) => {
   return (
     <>
       <motion.section
-        initial={'hidden'}
-        whileInView={'visible'}
-        viewport={{
-          once: true,
-          amount: 0.2
+        initial={{
+          opacity: 0,
+          y: 20
         }}
-        variants={{
-          hidden: {
-            opacity: 0,
-            y: 20
-          },
-          visible: {
-            opacity: 1,
-            y: 0
-          }
+        animate={{
+          opacity: 1,
+          y: 0
         }}
         transition={{
           duration: 0.1,
@@ -43,4 +36,4 @@ const AnimatedSection = ({ children, delay = 0, className = '' }: AnimatedSectio
   )
 }
 
-export default AnimatedSection
+export default FadeInSection

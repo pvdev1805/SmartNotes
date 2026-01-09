@@ -55,7 +55,7 @@ const NewNotePage = () => {
       // Redirect back to notes list
       const newId = createdNote?.id
       if (newId) router.push(`/notes/${newId}`)
-    } catch (error : any) {
+    } catch (error: any) {
       console.log(error.message)
       setError(error.message)
     }

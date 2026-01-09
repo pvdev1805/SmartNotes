@@ -27,3 +27,10 @@ export interface ApiResponse<T> {
   message: string
   data: T
 }
+
+export interface RefreshTokenData {
+  accessToken: string
+  refreshToken: string
+}
+
+export interface RefreshTokenResponse extends ApiResponse<RefreshTokenData> {}
