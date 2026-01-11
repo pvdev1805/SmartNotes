@@ -3,22 +3,20 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Sparkles, FileText, BookOpen, CircleChevronLeft, Notebook } from 'lucide-react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Note } from '@/types/note.type'
 import { QuizAttempt } from '@/types/quiz-attempt'
 import { Quiz } from '@/types/quiz.type'
-import { getNoteById, updateNote } from '@/services/note.service'
 import { getAllQuizAttempts, getQuiz, startQuizAttempt } from '@/services/quiz.service'
 import AnimatedSection from '@/components/landing/animated-section'
-import NoteCard from '@/components/notes/note-card'
 import Pagination from '@/components/pagination'
 import useQueryConfig from '@/hooks/use-query-config'
 import useUpdateQueryParam from '@/hooks/use-update-query-param'
 import AttemptCard from '@/components/quizzes/attempt-card'
+import { useNav } from '@/hooks/use-nav'
 
 const QuizPage = () => {
-  const router = useRouter()
+  const nav = useNav()
 
   const { quizId } = useParams()
   const [quiz, setQuiz] = useState<Quiz | null>(null)
@@ -26,7 +24,6 @@ const QuizPage = () => {
 
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
-  const allowLearnMore = false;
 
   const fetchData = async (id: number) => {
     setLoading(true)
@@ -64,17 +61,13 @@ const QuizPage = () => {
     setQueryParam('page', String(page))
   }
 
-  const handleBackToQuizzes = () => {
-    router.push('/quiz')
-  }
-
   const handleStartNewAttempt = async () => {
     setError('')
 
     if (!quiz) return
     try {
       const newAttempt = await startQuizAttempt(quiz.id)
-      router.push(`/quiz/${quiz.id}/attempt/${newAttempt.id}`)
+      nav.toNewQuizAttempt(quiz.id, newAttempt.id)
     } catch (error : any) {
       setError(error.message)
     }
@@ -84,7 +77,7 @@ const QuizPage = () => {
     <>
       {/* Back to previous */}
       <div className='flex items-center justify-between mb-4'>
-        <Button variant={'outline'} onClick={handleBackToQuizzes} className='flex items-center'>
+        <Button variant={'outline'} onClick={nav.toQuizList} className='flex items-center'>
           <CircleChevronLeft className='w-5 h-5' /> Back to Quizzes
         </Button>
       </div>
@@ -119,16 +112,17 @@ const QuizPage = () => {
             ) : !error && attempts.length === 0 ? (
               <div className='text-center text-gray-500 py-16'>
                 <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
-                <p className='text-lg'>No notes found. Try a different search or add a new note!</p>
+                <p className='text-lg'>No attempts found. Let's start a new attempt!</p>
               </div>
             ) : (
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
                 {paginatedAttempts.map((attempt) => (
                   <AttemptCard
+                    quizId={attempt.quizId}
                     key={attempt.id}
                     id={attempt.id}
                     score={attempt.score}
-                    totalQuestions={attempt.score}
+                    totalQuestions={attempt.totalQuestion}
                     attemptAt={new Date(attempt.attemptAt)}
                   />
                 ))}

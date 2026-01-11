@@ -1,24 +1,22 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Plus, Search, Filter, Notebook } from 'lucide-react'
+import { Plus, Search, Filter, Notebook, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
 import useQueryConfig from '@/hooks/use-query-config'
 import useUpdateQueryParam from '@/hooks/use-update-query-param'
-import NoteCard from '@/components/notes/note-card'
+import QuizCard from '@/components/quizzes/quiz-card'
 
-import { useRouter } from 'next/navigation'
-
-import { getAllQuizSets } from '@/services/quiz-set.service'
 import { Quiz } from '@/types/quiz.type'
-import { QuizSet } from '@/types/quiz-set.type'
+import { getDefaultQuizSet } from '@/services/quiz-set.service'
+import { useNav } from '@/hooks/use-nav'
 
-const QuizSetsListPage = () => {
-  const router = useRouter()
+const QuizzesListPage = () => {
+  const nav = useNav()
 
   const [search, setSearch] = useState('')
-  const [quizSets, setQuizSets] = useState<QuizSet[]>([])
+  const [quizzes, setQuizzes] = useState<Quiz[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -30,10 +28,14 @@ const QuizSetsListPage = () => {
     setError('')
 
     try {
-      const data = await getAllQuizSets()
-      setQuizSets(data)
+      const data = await getDefaultQuizSet()
+      if (data?.quizzes) {
+        setQuizzes(data?.quizzes)
+      } else {
+        setQuizzes([])
+      }
     } catch (error : any) {
-      setQuizSets([])
+      setQuizzes([])
       setError(error.message)
     } finally {
       setLoading(false)
@@ -44,7 +46,7 @@ const QuizSetsListPage = () => {
     fetchData()
   }, [])
 
-  const filteredData = quizSets.filter(
+  const filteredData = quizzes.filter(
     (quizSet) =>
       quizSet.title.toLowerCase().includes(search.toLowerCase())
   )
@@ -70,8 +72,8 @@ const QuizSetsListPage = () => {
   }
 
   const handleDeleted = (deletedId: number) => {
-    setQuizSets((prevQuizSets) =>
-      prevQuizSets.filter((quizSet) => quizSet.id !== deletedId)
+    setQuizzes((prevQuizzes) =>
+      prevQuizzes.filter((quizSet) => quizSet.id !== deletedId)
     )
   }
 
@@ -82,15 +84,22 @@ const QuizSetsListPage = () => {
         <div className='flex items-center justify-between mb-8'>
           <h1 className='text-3xl font-bold text-gray-900 flex items-center gap-2'>
             <Notebook className='w-7 h-7 text-blue-600' />
-            My Quiz Collection
+            Quizzes
           </h1>
-          <Button
-            className='flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:from-blue-600 hover:to-purple-600 transition'
-            onClick={() => router.push('/quiz-sets/new')}
-          >
-            <Plus className='w-5 h-5' />
-            New Collection
-          </Button>
+
+          <div className='flex gap-2'>
+            <Button variant='outline' onClick={nav.toQuizCollection}>
+              View Collections
+            </Button>
+            <Button
+              className='flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:from-blue-600 hover:to-purple-600 transition'
+              onClick={nav.toQuizGeneration}
+            >
+              <Plus className='w-5 h-5' />
+              Generate Quiz
+            </Button>
+          </div>
+
         </div>
       </AnimatedSection>
       {/* End - Header */}
@@ -124,7 +133,7 @@ const QuizSetsListPage = () => {
           <div className='bg-red-50 border border-red-200 rounded-lg p-6 mb-6'>
             <div className='flex items-start gap-3'>
               <div className='flex-1'>
-                <h3 className='text-red-900 font-semibold mb-1'>Error Loading Quiz Sets</h3>
+                <h3 className='text-red-900 font-semibold mb-1'>Error Loading Quizzes</h3>
                 <p className='text-red-700 mb-4'>{error}</p>
               </div>
             </div>
@@ -132,30 +141,30 @@ const QuizSetsListPage = () => {
         </AnimatedSection>
       )}
 
-      {/* Quiz Sets Grid */}
+      {/* Quizzes Grid */}
       <AnimatedSection delay={0.2}>
         {loading ? (
-          <p className="text-gray-500">Loading notes...</p>
+          <p className="text-gray-500">Loading quizzes...</p>
         ) : !error && filteredData.length === 0 ? (
           <div className='text-center text-gray-500 py-16'>
             <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
-            <p className='text-lg'>No collection found. Try a different search or add a collection!</p>
+            <p className='text-lg'>No quiz found. Try a different search or generate new quiz!</p>
           </div>
         ) : (
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {paginatedData.map((note) => (
-              <NoteCard
-                key={note.id}
-                id={note.id}
-                title={note.title}
-                description={''}
-                createdAt={new Date(note.createdAt)}
-                // tags={note.tags}
-                tags={[]}
-                // onFinishDelete={handleNoteDeleted}
-              />
-            ))}
-          </div>
+          <section className='mb-4 space-y-4'>
+            <h2 className='text-xl font-semibold text-foreground'>Recent Quizzes</h2>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {paginatedData.map((quiz) => (
+                <QuizCard
+                  key={quiz.id}
+                  id={quiz.id}
+                  title={quiz.title}
+                  totalQuestions={quiz.questions?.length}
+                  createdAt={new Date(quiz.createdAt)}
+                />
+              ))}
+            </div>
+          </section>
         )}
       </AnimatedSection>
 
@@ -175,4 +184,4 @@ const QuizSetsListPage = () => {
   )
 }
 
-export default QuizSetsListPage
+export default QuizzesListPage

@@ -61,6 +61,16 @@ export const getQuizAttempt = async (quizId : number, attemptId : number): Promi
   return apiRes.data
 }
 
+export const getQuizAttemptAnswer = async (quizId : number, attemptId : number): Promise<QuizAttempt> => {
+  const response = await apiClient.get(`${QUIZ_BASE_API}/${quizId}/attempts/${attemptId}/answer`)
+  const apiRes: ApiResponse<QuizAttempt> = response.data
+
+  if (!apiRes.data && apiRes.code != 1000) {
+    throw new Error(`Failed to get data: ${apiRes.message}`)
+  }
+  return apiRes.data
+}
+
 export const updateAttemptProgress = async (quizId : number, attemptId : number, request : { id : number , userAnswer: string }): Promise<QuizAttempt> => {
   const response = await apiClient.patch(`${QUIZ_BASE_API}/${quizId}/attempts/${attemptId}`, request)
   const apiRes: ApiResponse<QuizAttempt> = response.data

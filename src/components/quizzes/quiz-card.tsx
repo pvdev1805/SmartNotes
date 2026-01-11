@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import TimeAgo from '@/components/time-ago'
 import { MouseEvent, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { ROUTES } from '@/hooks/use-nav'
 // import { useRouter } from 'next/navigation'
 interface QuizCardProps {
   id: number
@@ -81,7 +82,7 @@ const QuizCard = ({ id, title, totalQuestions, createdAt }: QuizCardProps) => {
           >
             <MoreVertical className='w-4 h-4 text-muted-foreground' />
           </Button>
-          <Link href={`/quiz/${id}`} className='block p-4 hover:bg-gray-50 transition-colors duration-200 rounded-lg'>
+          <Link href={ROUTES.QUIZ.DETAIL(id)} className='block p-4 hover:bg-gray-50 transition-colors duration-200 rounded-lg'>
             <CardContent className='p-0'>
               <div className='flex items-start justify-between mb-1'>
                 <h3 className='font-semibold text-foreground truncate max-w-[200px] sm:max-w-[220px]'>{title}</h3>

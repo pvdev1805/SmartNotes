@@ -7,15 +7,17 @@ import TimeAgo from '@/components/time-ago'
 import { MouseEvent, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { AttemptDetail } from '@/types/quiz-attempt'
+import { ROUTES } from '@/hooks/use-nav'
 // import { useRouter } from 'next/navigation'
 interface AttemptCardProps {
+  quizId: number
   id: number
   score: number
   totalQuestions: number
   attemptAt: Date
 }
 
-const AttemptCard = ({ id, score, totalQuestions, attemptAt }: AttemptCardProps) => {
+const AttemptCard = ({ quizId, id, score, totalQuestions, attemptAt }: AttemptCardProps) => {
   const [actionsOpen, setActionsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const cancelButtonRef = useRef<HTMLButtonElement>(null)
@@ -82,14 +84,12 @@ const AttemptCard = ({ id, score, totalQuestions, attemptAt }: AttemptCardProps)
           >
             <MoreVertical className='w-4 h-4 text-muted-foreground' />
           </Button>
-          <Link href={`/quiz/${id}`} className='block p-4 hover:bg-gray-50 transition-colors duration-200 rounded-lg'>
+          <Link href={ROUTES.QUIZ.ATTEMPT_RESULT(quizId, id)} className='block p-4 hover:bg-gray-50 transition-colors duration-200 rounded-lg'>
             <CardContent className='p-0'>
               <div className='flex items-start justify-between mb-1'>
                 <h3 className='font-semibold text-foreground truncate max-w-[200px] sm:max-w-[220px]'>ID: {id}</h3>
               </div>
-
-              <p className='mb-4 text-sm text-muted-foreground lg:min-h-10 line-clamp-2'>Score: {score} / {totalQuestions}</p>
-              <p className='mb-4 text-sm text-muted-foreground lg:min-h-10 line-clamp-2'>Score: {score} / {totalQuestions}</p>
+              <p className='mb-4 text-sm text-muted-foreground lg:min-h-10 line-clamp-2'>Score: {score | 0} / {totalQuestions}</p>
               <TimeAgo date={attemptAt} className='mb-2' />
             </CardContent>
           </Link>
@@ -98,48 +98,36 @@ const AttemptCard = ({ id, score, totalQuestions, attemptAt }: AttemptCardProps)
         {/* Actions Menu */}
         {actionsOpen && (
           <>
-            {/* Desktop: Dropdown menu */}
-            {/*<div*/}
-            {/*  ref={menuRef}*/}
-            {/*  className='hidden md:block absolute right-4 top-12 z-20 bg-white border rounded shadow-lg w-24'*/}
-            {/*>*/}
-            {/*  <Button*/}
-            {/*    variant='ghost'*/}
-            {/*    className='w-full flex items-center gap-2 px-3 py-2 text-sm justify-start border-b'*/}
-            {/*    onClick={handleEdit}*/}
-            {/*  >*/}
-            {/*    <Edit className='w-4 h-4' />*/}
-            {/*    <span>Edit</span>*/}
-            {/*  </Button>*/}
-            {/*  <Button*/}
-            {/*    variant='ghost'*/}
-            {/*    className='w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 justify-start hover:bg-red-50 hover:text-red-600'*/}
-            {/*    onClick={handleDelete}*/}
-            {/*  >*/}
-            {/*    <Trash className='w-4 h-4' />*/}
-            {/*    <span>Delete</span>*/}
-            {/*  </Button>*/}
-            {/*</div>*/}
-            {/*/!* Mobile: Bottom sheet *!/*/}
-            {/*<div className='md:hidden fixed inset-x-0 bottom-0 z-30 bg-white border-t rounded-t-lg shadow-lg p-4 flex flex-col gap-2'>*/}
-            {/*  <Button variant='outline' className='w-full flex items-center gap-2 justify-center' onClick={handleEdit}>*/}
-            {/*    <Edit className='w-4 h-4' /> Edit*/}
-            {/*  </Button>*/}
-            {/*  <Button*/}
-            {/*    variant='outline'*/}
-            {/*    className='w-full flex items-center gap-2 justify-center text-white bg-red-600 hover:text-red-600 hover:bg-red-50'*/}
-            {/*    onClick={handleDelete}*/}
-            {/*  >*/}
-            {/*    <Trash className='w-4 h-4' /> Delete*/}
-            {/*  </Button>*/}
-            {/*  <Button*/}
-            {/*    variant='ghost'*/}
-            {/*    className='w-full flex items-center gap-2 justify-center text-red-600'*/}
-            {/*    onClick={handleCancel}*/}
-            {/*  >*/}
-            {/*    Cancel*/}
-            {/*  </Button>*/}
-            {/*</div>*/}
+            <div
+              ref={menuRef}
+              className='hidden md:block absolute right-4 top-12 z-20 bg-white border rounded shadow-lg w-24'
+            >
+              <Button
+                variant='ghost'
+                className='w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 justify-start hover:bg-red-50 hover:text-red-600'
+                onClick={handleDelete}
+              >
+                <Trash className='w-4 h-4' />
+                <span>Delete</span>
+              </Button>
+            </div>
+            {/* Mobile: Bottom sheet */}
+            <div className='md:hidden fixed inset-x-0 bottom-0 z-30 bg-white border-t rounded-t-lg shadow-lg p-4 flex flex-col gap-2'>
+              <Button
+                variant='outline'
+                className='w-full flex items-center gap-2 justify-center text-white bg-red-600 hover:text-red-600 hover:bg-red-50'
+                onClick={handleDelete}
+              >
+                <Trash className='w-4 h-4' /> Delete
+              </Button>
+              <Button
+                variant='ghost'
+                className='w-full flex items-center gap-2 justify-center text-red-600'
+                onClick={handleCancel}
+              >
+                Cancel
+              </Button>
+            </div>
           </>
         )}
         {/* End - Actions Menu */}

@@ -4,17 +4,14 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { FileText, BookOpen, Sparkles, UploadCloud, CircleChevronLeft, Notebook, Plus, ToggleLeft } from 'lucide-react'
-// import { notes } from '@/data/notes'
-import { useRouter } from 'next/navigation'
 import { Note } from '@/types/note.type'
 import { generateSingleQuiz } from '@/services/quiz.service'
 import AnimatedSection from '@/components/landing/animated-section'
 import { getAllNotes } from '@/services/note.service'
-
-// const mockNotes = notes.map((note) => ({ id: note.id, title: note.title }))
+import { useNav } from '@/hooks/use-nav'
 
 const NoteSelectionPage = () => {
-  const router = useRouter()
+  const nav = useNav()
 
   const [notes, setNotes] = useState<Note[]>([])
   const [error, setError] = useState('')
@@ -48,10 +45,6 @@ const NoteSelectionPage = () => {
     fetchData()
   }, [])
 
-  const handleBackToQuizGeneration = () => {
-    router.push('/quiz/generation')
-  }
-
   const handleMultipleToggle = () => {
     setMultiple(!isMultiple)
     setSelectedNotes([])
@@ -84,7 +77,7 @@ const NoteSelectionPage = () => {
     if (!selectedNoteId) return
     try {
       const quiz = await generateSingleQuiz(selectedNoteId)
-      router.push('/quiz')
+      nav.toQuizList()
     } catch (error : any) {
       setError(error.message)
     } finally {
@@ -96,7 +89,7 @@ const NoteSelectionPage = () => {
     <>
       {/* Buttons */}
       <div className='flex items-center justify-between mb-4'>
-        <Button variant={'outline'} onClick={handleBackToQuizGeneration} className='flex items-center'>
+        <Button variant={'outline'} onClick={nav.toQuizGeneration} className='flex items-center'>
           <CircleChevronLeft className='w-5 h-5' /> Back to Quizzes
         </Button>
       </div>

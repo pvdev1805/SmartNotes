@@ -3,124 +3,10 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { AttemptDetail, QuizAttempt } from '@/types/quiz-attempt'
-import { getNoteById, updateNote } from '@/services/note.service'
-import { finishAttempt, getQuizAttempt, updateAttemptProgress } from '@/services/quiz.service'
-import { useParams, useRouter } from 'next/navigation'
-import { CircleChevronLeft } from 'lucide-react'
-
-// const mockQuestions = [
-//   {
-//     id: 1,
-//     text: 'Which one is NOT a JavaScript framework?',
-//     options: [
-//       { key: 'A', text: 'React' },
-//       { key: 'B', text: 'Angular' },
-//       { key: 'C', text: 'Vue' },
-//       { key: 'D', text: 'Laravel' }
-//     ],
-//     correctOption: 'D'
-//   },
-//   {
-//     id: 2,
-//     text: 'What does HTML stand for?',
-//     options: [
-//       { key: 'A', text: 'Hyper Trainer Marking Language' },
-//       { key: 'B', text: 'Hyper Text Markup Language' },
-//       { key: 'C', text: 'Hyper Text Marketing Language' },
-//       { key: 'D', text: 'Hyper Text Markup Leveler' }
-//     ],
-//     correctOption: 'B'
-//   },
-//   {
-//     id: 3,
-//     text: 'Which company developed TypeScript?',
-//     options: [
-//       { key: 'A', text: 'Facebook' },
-//       { key: 'B', text: 'Microsoft' },
-//       { key: 'C', text: 'Google' },
-//       { key: 'D', text: 'Amazon' }
-//     ],
-//     correctOption: 'B'
-//   },
-//   {
-//     id: 4,
-//     text: 'Which is a backend language?',
-//     options: [
-//       { key: 'A', text: 'Python' },
-//       { key: 'B', text: 'CSS' },
-//       { key: 'C', text: 'HTML' },
-//       { key: 'D', text: 'Sass' }
-//     ],
-//     correctOption: 'A'
-//   },
-//   {
-//     id: 5,
-//     text: 'What is the output of 2 + "2" in JavaScript?',
-//     options: [
-//       { key: 'A', text: '4' },
-//       { key: 'B', text: '"22"' },
-//       { key: 'C', text: 'NaN' },
-//       { key: 'D', text: 'undefined' }
-//     ],
-//     correctOption: 'B'
-//   },
-//   {
-//     id: 6,
-//     text: 'Which tag is used for the largest heading in HTML?',
-//     options: [
-//       { key: 'A', text: '<h1>' },
-//       { key: 'B', text: '<h6>' },
-//       { key: 'C', text: '<head>' },
-//       { key: 'D', text: '<header>' }
-//     ],
-//     correctOption: 'A'
-//   },
-//   {
-//     id: 7,
-//     text: 'Which of these is a NoSQL database?',
-//     options: [
-//       { key: 'A', text: 'MySQL' },
-//       { key: 'B', text: 'PostgreSQL' },
-//       { key: 'C', text: 'MongoDB' },
-//       { key: 'D', text: 'Oracle' }
-//     ],
-//     correctOption: 'C'
-//   },
-//   {
-//     id: 8,
-//     text: 'Which CSS property changes text color?',
-//     options: [
-//       { key: 'A', text: 'font-style' },
-//       { key: 'B', text: 'color' },
-//       { key: 'C', text: 'background-color' },
-//       { key: 'D', text: 'text-decoration' }
-//     ],
-//     correctOption: 'B'
-//   },
-//   {
-//     id: 9,
-//     text: 'Which is a JavaScript data type?',
-//     options: [
-//       { key: 'A', text: 'float' },
-//       { key: 'B', text: 'number' },
-//       { key: 'C', text: 'decimal' },
-//       { key: 'D', text: 'character' }
-//     ],
-//     correctOption: 'B'
-//   },
-//   {
-//     id: 10,
-//     text: 'Which HTML attribute is used for an image source?',
-//     options: [
-//       { key: 'A', text: 'src' },
-//       { key: 'B', text: 'href' },
-//       { key: 'C', text: 'alt' },
-//       { key: 'D', text: 'link' }
-//     ],
-//     correctOption: 'A'
-//   }
-// ]
+import { QuizAttempt } from '@/types/quiz-attempt'
+import { finishAttempt, getQuizAttempt, startQuizAttempt, updateAttemptProgress } from '@/services/quiz.service'
+import { useParams } from 'next/navigation'
+import { useNav } from '@/hooks/use-nav'
 
 interface Question {
   id: number
@@ -132,7 +18,7 @@ interface Question {
 }
 
 const QuizQuestionPage = () => {
-  const router = useRouter()
+  const nav = useNav()
 
   const { quizId, attemptId } = useParams()
   const [attempt, setAttempt] = useState<QuizAttempt | null>();
@@ -183,10 +69,6 @@ const QuizQuestionPage = () => {
   useEffect(() => {
     fetchData(Number(quizId), Number(attemptId));
   }, [quizId])
-
-  const handleBackToQuiz = () => {
-    router.push(`/quiz/${quizId}`)
-  }
 
   const handleSelect = (optionKey: string) => {
     setAnswers((prev) => {
@@ -253,6 +135,17 @@ const QuizQuestionPage = () => {
     }
   }
 
+  const handleNewQuizAttempt = async () => {
+    setError('')
+
+    try {
+      const newAttempt = await startQuizAttempt(Number(quizId))
+      nav.toNewQuizAttempt(Number(quizId), newAttempt.id)
+    } catch (error : any) {
+      setError(error.message)
+    }
+  }
+
   // Calculate results
   const results = submitted
     ? questions.map((q, idx) => ({
@@ -268,7 +161,7 @@ const QuizQuestionPage = () => {
       <div className='min-h-screen flex flex-col items-center bg-gray-50 px-2 py-8'>
         <Card className='w-full max-w-xl shadow-lg rounded-xl p-8 bg-white'>
           <CardContent>
-            <h2 className='text-2xl font-bold text-gray-900 mb-4'>Quiz Results</h2>
+            <h2 className='text-2xl font-bold text-gray-900 mb-4'>Quiz Ended</h2>
             <div className='mb-4 text-lg'>
               You scored <span className='font-bold text-blue-700'>{score}</span> out of{' '}
               <span className='font-bold'>{questions.length}</span>
@@ -303,8 +196,9 @@ const QuizQuestionPage = () => {
             </div>
 
             <div className='flex items-center justify-between mb-4'>
-              <Button onClick={() => window.location.reload()}>Try Again</Button>
-              <Button variant={'outline'} onClick={handleBackToQuiz} className='flex items-center'>
+              {/*<Button onClick={() => window.location.reload()}>Try Again</Button>*/}
+              <Button onClick={handleNewQuizAttempt}>Try New Attempt</Button>
+              <Button variant={'outline'} onClick={() => nav.toQuiz(Number(quizId))} className='flex items-center'>
                 Back to Quiz
               </Button>
             </div>

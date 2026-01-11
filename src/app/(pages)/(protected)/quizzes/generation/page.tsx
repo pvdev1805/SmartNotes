@@ -11,11 +11,11 @@ const QuizGenerationPage = () => {
   const allowLearnMore = false;
 
   const handleBackToQuizzes = () => {
-    router.push('/quiz')
+    router.push('/quizzes')
   }
 
   const handleRedirectToCreateQuiz = () => {
-    router.push('/quiz/generation/note')
+    router.push('/quizzes/generation/note')
   }
 
   return (
