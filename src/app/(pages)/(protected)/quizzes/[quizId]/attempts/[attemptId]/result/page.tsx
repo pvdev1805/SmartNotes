@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { CheckCircle, CircleChevronLeft, XCircle } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { getQuizAttemptAnswer } from '@/services/quiz.service'
+import { getAttemptAnswer } from '@/services/quiz.service'
 import { useNav } from '@/hooks/use-nav'
 
 interface Result {
@@ -38,7 +38,7 @@ const QuizResultPage = () => {
     setError('')
 
     try {
-      const data = await getQuizAttemptAnswer(qid, aid)
+      const data = await getAttemptAnswer(qid, aid)
       if (!data.attemptDetails) {
         throw new Error("This attempt has no information, please try again")
       }

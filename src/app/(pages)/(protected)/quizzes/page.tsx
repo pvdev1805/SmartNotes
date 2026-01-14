@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Plus, Search, Filter, Notebook, ChevronRight } from 'lucide-react'
+import { Plus, Search, Filter, Notebook, ChevronRight, Folder } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
@@ -11,8 +11,10 @@ import QuizCard from '@/components/quizzes/quiz-card'
 import { Quiz } from '@/types/quiz.type'
 import { getDefaultQuizSet } from '@/services/quiz-set.service'
 import { useNav } from '@/hooks/use-nav'
+import { useRouter } from 'next/navigation'
 
 const QuizzesListPage = () => {
+  const router = useRouter()
   const nav = useNav()
 
   const [search, setSearch] = useState('')
@@ -72,9 +74,8 @@ const QuizzesListPage = () => {
   }
 
   const handleDeleted = (deletedId: number) => {
-    setQuizzes((prevQuizzes) =>
-      prevQuizzes.filter((quizSet) => quizSet.id !== deletedId)
-    )
+    setQuizzes((prevQuizzes) => prevQuizzes.filter((quizSet) => quizSet.id !== deletedId))
+    router.refresh()
   }
 
   return (
@@ -89,6 +90,7 @@ const QuizzesListPage = () => {
 
           <div className='flex gap-2'>
             <Button variant='outline' onClick={nav.toQuizCollection}>
+              <Folder className='w-5 h-5' />
               View Collections
             </Button>
             <Button
@@ -111,7 +113,7 @@ const QuizzesListPage = () => {
             <Search className='absolute left-3 top-3 text-gray-400 w-5 h-5' />
             <input
               type='text'
-              placeholder='Search notes...'
+              placeholder='Search quizzes...'
               value={search}
               onChange={handleSearchInputChange}
               className={`w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 
@@ -142,6 +144,7 @@ const QuizzesListPage = () => {
       )}
 
       {/* Quizzes Grid */}
+      <h2 className='text-xl font-semibold text-foreground mb-3'>Uncategorized Quizzes</h2>
       <AnimatedSection delay={0.2}>
         {loading ? (
           <p className="text-gray-500">Loading quizzes...</p>
@@ -152,7 +155,6 @@ const QuizzesListPage = () => {
           </div>
         ) : (
           <section className='mb-4 space-y-4'>
-            <h2 className='text-xl font-semibold text-foreground'>Recent Quizzes</h2>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
               {paginatedData.map((quiz) => (
                 <QuizCard
@@ -161,6 +163,7 @@ const QuizzesListPage = () => {
                   title={quiz.title}
                   totalQuestions={quiz.questions?.length}
                   createdAt={new Date(quiz.createdAt)}
+                  onFinishDelete={() => handleDeleted(quiz.id)}
                 />
               ))}
             </div>

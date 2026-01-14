@@ -1,24 +1,43 @@
 'use client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Edit, Trash, Tag, MoreVertical } from 'lucide-react'
+import { Edit, Trash, Tag, MoreVertical, FolderPlus } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import TimeAgo from '@/components/time-ago'
 import { MouseEvent, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ROUTES } from '@/hooks/use-nav'
-// import { useRouter } from 'next/navigation'
+import { deleteQuizBy, updateQuiz } from '@/services/quiz.service'
+import ConfirmationModal from '@/components/common/confirmation-modal'
+import CollectionSelection from '@/components/common/collection-selection'
+import { getAllQuizSets } from '@/services/quiz-set.service'
+import { QuizSet } from '@/types/quiz-set.type'
+
 interface QuizCardProps {
   id: number
   title: string
   totalQuestions?: number
   createdAt: Date
+  onFinishDelete: (id: number) => void // callback to remove deleted note
 }
 
-const QuizCard = ({ id, title, totalQuestions, createdAt }: QuizCardProps) => {
+interface Collection {
+  id: number
+  title: string
+}
+
+const QuizCard = ({ id, title, totalQuestions, createdAt, onFinishDelete }: QuizCardProps) => {
   const [actionsOpen, setActionsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const cancelButtonRef = useRef<HTMLButtonElement>(null)
+
+  // Modals
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const [collectionSelectionOpen, setCollectionSelectionOpen] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
+  const [collection, setCollection] = useState<Collection[]>([])
 
   const MAX_TAGS_DISPLAY = 2
 
@@ -39,6 +58,21 @@ const QuizCard = ({ id, title, totalQuestions, createdAt }: QuizCardProps) => {
     setActionsOpen((prev) => !prev)
   }
 
+  const handleAddToCollection = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    setActionsOpen(false)
+
+    const result = await getAllQuizSets()
+    const mappedCollection: Collection[] = result.map((quizSet) => ({
+      id: quizSet.id,
+      title: quizSet.title
+    }))
+    setCollection(mappedCollection)
+
+    setCollectionSelectionOpen(true)
+    console.log('Add to collection action triggered for quiz:', id)
+  }
+
   const handleEdit = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
     setActionsOpen(false)
@@ -51,8 +85,41 @@ const QuizCard = ({ id, title, totalQuestions, createdAt }: QuizCardProps) => {
     event.stopPropagation()
     setActionsOpen(false)
     // Logic to handle delete action, e.g., show confirmation dialog
-    // useRouter().push(`/notes/${id}/delete`)
+    setDeleteConfirmationOpen(true)
     console.log('Delete action triggered for quiz:', id)
+  }
+
+  const handleConfirmSelection = async (newQuizSetId: number) => {
+    try {
+      setIsAdding(true)
+      await updateQuiz(id, {
+        quizSetId: newQuizSetId,
+        topic: title
+      })
+
+    } catch (error : any) {
+      console.log(error.message)
+    } finally {
+      setIsAdding(false)
+      setCollectionSelectionOpen(false)
+    }
+  }
+
+  const handleConfirmDelete = async () => {
+    try {
+      setIsDeleting(true)
+
+      await deleteQuizBy(id)
+
+      if (onFinishDelete) {
+        onFinishDelete(id)
+      }
+    } catch (error : any) {
+      console.log(error.message)
+    } finally {
+      setIsDeleting(false)
+      setDeleteConfirmationOpen(false)
+    }
   }
 
   const handleCancel = (event: MouseEvent<HTMLButtonElement>) => {
@@ -105,10 +172,10 @@ const QuizCard = ({ id, title, totalQuestions, createdAt }: QuizCardProps) => {
               <Button
                 variant='ghost'
                 className='w-full flex items-center gap-2 px-3 py-2 text-sm justify-start border-b'
-                onClick={handleEdit}
+                onClick={handleAddToCollection}
               >
-                <Edit className='w-4 h-4' />
-                <span>Edit</span>
+                <FolderPlus className='w-4 h-4' />
+                <span>Add</span>
               </Button>
               <Button
                 variant='ghost'
@@ -121,8 +188,8 @@ const QuizCard = ({ id, title, totalQuestions, createdAt }: QuizCardProps) => {
             </div>
             {/* Mobile: Bottom sheet */}
             <div className='md:hidden fixed inset-x-0 bottom-0 z-30 bg-white border-t rounded-t-lg shadow-lg p-4 flex flex-col gap-2'>
-              <Button variant='outline' className='w-full flex items-center gap-2 justify-center' onClick={handleEdit}>
-                <Edit className='w-4 h-4' /> Edit
+              <Button variant='outline' className='w-full flex items-center gap-2 justify-center' onClick={handleAddToCollection}>
+                <FolderPlus className='w-4 h-4' /> Add to collection
               </Button>
               <Button
                 variant='outline'
@@ -142,6 +209,32 @@ const QuizCard = ({ id, title, totalQuestions, createdAt }: QuizCardProps) => {
           </>
         )}
         {/* End - Actions Menu */}
+
+        {/* Confirmation Modal */}
+        {deleteConfirmationOpen &&
+          <ConfirmationModal
+            type="quiz"
+            id={id}
+            title={title}
+            isDeleting={isDeleting}
+            onCancel={() => setDeleteConfirmationOpen(false)}
+            onConfirm={handleConfirmDelete}
+          ></ConfirmationModal>
+        }
+        {/* End - Confirmation Modal */}
+
+        {/* Collection Selection Modal */}
+        {collectionSelectionOpen &&
+          <CollectionSelection
+            objId={id}
+            objTitle={title}
+            isAdding={isAdding}
+            collections={collection}
+            onCancel={() => setCollectionSelectionOpen(false)}
+            onConfirm={handleConfirmSelection}
+          ></CollectionSelection>
+        }
+        {/* End - Collection Selection Modal */}
       </Card>
     </>
   )
