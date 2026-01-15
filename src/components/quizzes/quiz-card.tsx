@@ -7,18 +7,20 @@ import TimeAgo from '@/components/time-ago'
 import { MouseEvent, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ROUTES } from '@/hooks/use-nav'
-import { deleteQuizBy, updateQuiz } from '@/services/quiz.service'
-import ConfirmationModal from '@/components/common/confirmation-modal'
-import CollectionSelection from '@/components/common/collection-selection'
+import { deleteQuiz, updateQuiz } from '@/services/quiz.service'
+import DeleteConfirmationModal from '@/components/modals/delete-confirmation'
+import CollectionSelection from '@/components/modals/collection-selection'
 import { getAllQuizSets } from '@/services/quiz-set.service'
 import { QuizSet } from '@/types/quiz-set.type'
 
 interface QuizCardProps {
   id: number
   title: string
+  quizSetId: number
   totalQuestions?: number
   createdAt: Date
-  onFinishDelete: (id: number) => void // callback to remove deleted note
+  onFinishCollectionChange: () => void
+  onFinishDelete: () => void // callback to remove deleted note
 }
 
 interface Collection {
@@ -26,7 +28,7 @@ interface Collection {
   title: string
 }
 
-const QuizCard = ({ id, title, totalQuestions, createdAt, onFinishDelete }: QuizCardProps) => {
+const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, onFinishCollectionChange, onFinishDelete }: QuizCardProps) => {
   const [actionsOpen, setActionsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const cancelButtonRef = useRef<HTMLButtonElement>(null)
@@ -65,7 +67,7 @@ const QuizCard = ({ id, title, totalQuestions, createdAt, onFinishDelete }: Quiz
     const result = await getAllQuizSets()
     const mappedCollection: Collection[] = result.map((quizSet) => ({
       id: quizSet.id,
-      title: quizSet.title
+      title: quizSet.originType === "DEFAULT" ? "DEFAULT" : quizSet.title
     }))
     setCollection(mappedCollection)
 
@@ -97,6 +99,9 @@ const QuizCard = ({ id, title, totalQuestions, createdAt, onFinishDelete }: Quiz
         topic: title
       })
 
+      if (quizSetId !== newQuizSetId) {
+        onFinishCollectionChange()
+      }
     } catch (error : any) {
       console.log(error.message)
     } finally {
@@ -109,11 +114,9 @@ const QuizCard = ({ id, title, totalQuestions, createdAt, onFinishDelete }: Quiz
     try {
       setIsDeleting(true)
 
-      await deleteQuizBy(id)
+      await deleteQuiz(id)
 
-      if (onFinishDelete) {
-        onFinishDelete(id)
-      }
+      onFinishDelete()
     } catch (error : any) {
       console.log(error.message)
     } finally {
@@ -212,14 +215,14 @@ const QuizCard = ({ id, title, totalQuestions, createdAt, onFinishDelete }: Quiz
 
         {/* Confirmation Modal */}
         {deleteConfirmationOpen &&
-          <ConfirmationModal
+          <DeleteConfirmationModal
             type="quiz"
             id={id}
             title={title}
             isDeleting={isDeleting}
             onCancel={() => setDeleteConfirmationOpen(false)}
             onConfirm={handleConfirmDelete}
-          ></ConfirmationModal>
+          ></DeleteConfirmationModal>
         }
         {/* End - Confirmation Modal */}
 
@@ -228,11 +231,12 @@ const QuizCard = ({ id, title, totalQuestions, createdAt, onFinishDelete }: Quiz
           <CollectionSelection
             objId={id}
             objTitle={title}
+            orgCollectionId={quizSetId}
             isAdding={isAdding}
             collections={collection}
             onCancel={() => setCollectionSelectionOpen(false)}
             onConfirm={handleConfirmSelection}
-          ></CollectionSelection>
+          />
         }
         {/* End - Collection Selection Modal */}
       </Card>

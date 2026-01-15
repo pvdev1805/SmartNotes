@@ -22,6 +22,16 @@ export const generateSingleQuiz = async (docId : number): Promise<Quiz> => {
   return apiRes.data
 }
 
+export const getAllQuizzes = async (): Promise<Quiz[]> => {
+  const response = await apiClient.get(QUIZ_BASE_API)
+  const apiRes: ApiResponse<Quiz[]> = response.data
+
+  if (!apiRes.data && apiRes.code != 1000) {
+    throw new Error(`Failed to get data: ${apiRes.message}`)
+  }
+  return apiRes.data
+}
+
 export const getQuiz = async (quizId : number): Promise<Quiz> => {
   const response = await apiClient.get(`${QUIZ_BASE_API}/${quizId}`)
   const apiRes: ApiResponse<Quiz> = response.data
@@ -44,7 +54,7 @@ export const updateQuiz = async (quizId : number, request : { quizSetId : number
   return apiRes.data
 }
 
-export const deleteQuizBy = async (quizId : number) => {
+export const deleteQuiz = async (quizId : number) => {
   const response = await apiClient.delete(`${QUIZ_BASE_API}/${quizId}`)
   const apiRes: ApiResponse<Quiz> = response.data
 

@@ -3,7 +3,7 @@ import { Quiz } from '@/types/quiz.type'
 export interface QuizSet {
   id: number
   title: string
-  originType: number
+  originType: string
   quizzes?: Quiz[]
   createdAt: string
   updatedAt?: string

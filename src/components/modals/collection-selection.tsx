@@ -10,6 +10,7 @@ interface Collection {
 interface AddToCollectionModalProps {
   objId: number // object's id
   objTitle: string // object's title
+  orgCollectionId: number // object's origin collection's id
   collections: Collection[] // Available choices
   isAdding: boolean
   onCancel: () => void
@@ -19,12 +20,13 @@ interface AddToCollectionModalProps {
 const AddToCollectionModal = ({
                                 objId,
                                 objTitle,
+                                orgCollectionId,
                                 collections,
                                 isAdding,
                                 onCancel,
                                 onConfirm
                               }: AddToCollectionModalProps) => {
-  const [selectedCollectionId, setSelectedCollectionId] = useState<number | null>(null)
+  const [selectedCollectionId, setSelectedCollectionId] = useState<number | null>(orgCollectionId)
 
   const handleConfirm = () => {
     if (selectedCollectionId !== null) {
@@ -99,7 +101,7 @@ const AddToCollectionModal = ({
             <Button
               onClick={handleConfirm}
               className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2"
-              disabled={isAdding || selectedCollectionId === null}
+              disabled={isAdding || selectedCollectionId === null || selectedCollectionId === orgCollectionId}
             >
               {isAdding ? (
                 <>

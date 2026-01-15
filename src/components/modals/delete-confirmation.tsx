@@ -10,7 +10,7 @@ interface ConfirmationModalProps {
   onConfirm: () => void
 }
 
-const ConfirmationModal = ({ type, id, title, isDeleting, onCancel, onConfirm } : ConfirmationModalProps) => {
+const DeleteConfirmationModal = ({ type, id, title, isDeleting, onCancel, onConfirm } : ConfirmationModalProps) => {
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center  backdrop-blur-sm animate-in fade-in duration-200">
@@ -70,4 +70,4 @@ const ConfirmationModal = ({ type, id, title, isDeleting, onCancel, onConfirm } 
   )
 }
 
-export default ConfirmationModal
+export default DeleteConfirmationModal

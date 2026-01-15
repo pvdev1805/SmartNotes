@@ -6,7 +6,8 @@ export const ROUTES = {
   HOME: '/',
   QUIZ: {
     LIST: '/quizzes',
-    COLLECTION: '/quizzes/collections',
+    COLLECTION: (id: number | undefined) => `/quizzes/collections/${id}`,
+    COLLECTION_LIST: '/quizzes/collections',
     COLLECTION_CREATION: '/quizzes/collections/new',
     GENERATION: '/quizzes/generation',
     DETAIL: (id: number | undefined) => `/quizzes/${id}`,
@@ -21,10 +22,12 @@ export const useNav = () => {
   return {
     toHome: () => router.push(ROUTES.HOME),
     toQuizList: () => router.push(ROUTES.QUIZ.LIST),
-    toQuizCollection: () => router.push(ROUTES.QUIZ.COLLECTION),
+    toQuizCollection: (id: number) => router.push(ROUTES.QUIZ.COLLECTION(id)),
+    toQuizCollectionList: () => router.push(ROUTES.QUIZ.COLLECTION_LIST),
     toQuizCollectionCreation: () => router.push(ROUTES.QUIZ.COLLECTION_CREATION),
     toQuizGeneration: () => router.push(ROUTES.QUIZ.GENERATION),
     toQuiz: (id: number | undefined) => router.push(ROUTES.QUIZ.DETAIL(id)),
-    toNewQuizAttempt: (qid: number | undefined, aid: number | undefined) => router.push(ROUTES.QUIZ.ATTEMPT_DETAIL(qid, aid))
+    toNewQuizAttempt: (qid: number | undefined, aid: number | undefined) => router.push(ROUTES.QUIZ.ATTEMPT_DETAIL(qid, aid)),
+    refresh: () => router.refresh()
   }
 }

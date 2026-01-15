@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Plus, Search, Filter, Notebook, CircleChevronLeft } from 'lucide-react'
+import { Plus, Search, Filter, Notebook, CircleChevronLeft, Folder } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
@@ -8,25 +8,22 @@ import useQueryConfig from '@/hooks/use-query-config'
 import useUpdateQueryParam from '@/hooks/use-update-query-param'
 import NoteCard from '@/components/notes/note-card'
 
-import { createQuizSet, getAllQuizSets, getQuizSet } from '@/services/quiz-set.service'
+import { getAllQuizSets, getQuizSet } from '@/services/quiz-set.service'
 import { QuizSet } from '@/types/quiz-set.type'
 import { useNav } from '@/hooks/use-nav'
 import { useParams } from 'next/navigation'
-import QuizSetCard from '@/components/quizzes/quiz-set-card'
-import QuizSetInfoModal from '@/components/quizzes/quiz-set-info-modal'
+import { Quiz } from '@/types/quiz.type'
+import QuizCard from '@/components/quizzes/quiz-card'
 
-const QuizSetsListPage = () => {
+const QuizSetPage = () => {
   const nav = useNav()
   const { setId } = useParams()
 
   const [search, setSearch] = useState('')
-  const [quizSets, setQuizSets] = useState<QuizSet[]>([])
+  const [quizSet, setQuizSet] = useState<QuizSet | null>(null)
+  const [quizzes, setQuizzes] = useState<Quiz[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
-
-  // Create new collection
-  const [creationModalOpen, setCreationModalOpen] = useState(false)
-  const [isCreating, setIsCreating] = useState(false)
 
   const allowSearch = false;
   const allowFilter = false;
@@ -36,10 +33,16 @@ const QuizSetsListPage = () => {
     setError('')
 
     try {
-      const data = await getAllQuizSets()
-      setQuizSets(data)
+      const data = await getQuizSet(id)
+      console.log(data)
+      setQuizSet(data)
+      if (data.quizzes) {
+        setQuizzes(data.quizzes)
+      } else {
+        setQuizzes([])
+      }
     } catch (error : any) {
-      setQuizSets([])
+      setQuizSet(null)
       setError(error.message)
     } finally {
       setLoading(false)
@@ -50,12 +53,16 @@ const QuizSetsListPage = () => {
     fetchData(Number(setId))
   }, [])
 
-  const filteredData = quizSets.filter(
-    (quizSet) =>
-      quizSet.title.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+
+  })
+
+  const filteredData = quizzes.filter(
+    (quiz) =>
+      quiz.title.toLowerCase().includes(search.toLowerCase())
   )
 
-  const pageSize = 12
+  const pageSize = 6
   const queryConfig = useQueryConfig()
   const setQueryParam = useUpdateQueryParam()
   const currentPage = Number(queryConfig.page) || 1
@@ -75,27 +82,8 @@ const QuizSetsListPage = () => {
     setQueryParam('page', String(page))
   }
 
-  const handleRenamed = () => {
-    fetchData(Number(setId))
-  }
-
-  const handleDeleted = (deletedId: number) => {
-    setQuizSets((prevQuizSets) =>
-      prevQuizSets.filter((quizSet) => quizSet.id !== deletedId)
-    )
-  }
-
-  const handleCreateQuizSet = async (title: string) => {
-    setIsCreating(true)
-    try {
-      const createdSet = await createQuizSet({ title })
-      setCreationModalOpen(false)
-      await fetchData(Number(setId))
-    } catch (error) {
-      console.error('Failed to create quiz set:', error)
-    } finally {
-      setIsCreating(false)
-    }
+  const removeQuizFromList = (deletedId: number) => {
+    setQuizzes((prevQuizzes) => prevQuizzes.filter((quizSet) => quizSet.id !== deletedId))
   }
 
   return (
@@ -109,16 +97,22 @@ const QuizSetsListPage = () => {
               <CircleChevronLeft className='w-5 h-5' /> Back to Quizzes
             </Button>
           </div>
-          <h1 className='text-3xl font-bold text-gray-900 flex items-center gap-2'>Quiz Collection</h1>
-          <Button
-            className='flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:from-blue-600 hover:to-purple-600 transition'
-            onClick={() => {
-              setCreationModalOpen(true)
-            }}
-          >
-            <Plus className='w-5 h-5' />
-            New Collection
-          </Button>
+          <h1 className='text-3xl font-bold text-gray-900 flex items-center gap-2'>
+            {quizSet?.originType === "DEFAULT" ? "DEFAULT" : (quizSet?.title || "Quiz Collection")}
+          </h1>
+          <div className='flex gap-2'>
+            <Button variant='outline' onClick={nav.toQuizCollectionList}>
+              <Folder className='text-gray-400' />
+              Collections
+            </Button>
+            <Button
+              className='flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:from-blue-600 hover:to-purple-600 transition'
+              onClick={nav.toQuizGeneration}
+            >
+              <Plus className='w-5 h-5' />
+              Generate
+            </Button>
+          </div>
         </div>
       </AnimatedSection>
       {/* End - Header */}
@@ -163,22 +157,24 @@ const QuizSetsListPage = () => {
       {/* Quiz Sets Grid */}
       <AnimatedSection delay={0.2}>
         {loading ? (
-          <p className='text-gray-500'>Loading data...</p>
+          <p className="text-gray-500">Loading data...</p>
         ) : !error && filteredData.length === 0 ? (
           <div className='text-center text-gray-500 py-16'>
             <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
-            <p className='text-lg'>No collection found. Try a different search or add a collection!</p>
+            <p className='text-lg'>No quizzes found. Create new quiz and add it to this collection.</p>
           </div>
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {paginatedData.map((quizSet) => (
-              <QuizSetCard
-                key={quizSet.id}
-                id={quizSet.id}
-                originType={quizSet.originType}
-                title={quizSet.title}
-                onFinishRename={handleRenamed}
-                onFinishDelete={() => handleDeleted(quizSet.id)}
+            {paginatedData.map((quiz) => (
+              <QuizCard
+                key={quiz.id}
+                id={quiz.id}
+                title={quiz.title}
+                quizSetId={quiz.quizSetId}
+                totalQuestions={quiz.questions?.length}
+                createdAt={new Date(quiz.createdAt)}
+                onFinishCollectionChange={() => removeQuizFromList(quiz.id)}
+                onFinishDelete={() => removeQuizFromList(quiz.id)}
               />
             ))}
           </div>
@@ -197,18 +193,8 @@ const QuizSetsListPage = () => {
         )}
       </AnimatedSection>
       {/* End - Pagination */}
-
-      {/* Create Quiz Set Modal */}
-      {creationModalOpen && (
-        <QuizSetInfoModal
-          isProcessing={isCreating}
-          onCancel={() => setCreationModalOpen(false)}
-          onConfirm={handleCreateQuizSet}
-        />
-      )}
-      {/* End - Create Quiz Set Modal */}
     </div>
   )
 }
 
-export default QuizSetsListPage
+export default QuizSetPage
