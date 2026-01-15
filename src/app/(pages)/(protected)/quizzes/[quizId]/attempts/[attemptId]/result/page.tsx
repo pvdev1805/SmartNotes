@@ -7,29 +7,15 @@ import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getAttemptAnswer } from '@/services/quiz.service'
 import { useNav } from '@/hooks/use-nav'
-
-interface Result {
-  score: number
-  total: number
-  percent: number
-  questions: Question[]
-}
-
-interface Question {
-  id: number
-  text: string
-  options: { key: string; text: string }[]
-  correctAnswer?: string
-  userAnswer?: string
-  isCorrect?: boolean
-}
+import { AttemptQuestion, AttemptResult } from '@/types/quesiton.type'
+import { toAttemptQuestion } from '@/mapper/attempt-mapper'
 
 const QuizResultPage = () => {
   const nav = useNav()
 
   const { quizId, attemptId } = useParams()
 
-  const [result, setResult] = useState<Result>({score: 0, total: 0, percent: 0, questions: []});
+  const [result, setResult] = useState<AttemptResult>({score: 0, total: 0, percent: 0, questions: []});
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -42,24 +28,12 @@ const QuizResultPage = () => {
       if (!data.attemptDetails) {
         throw new Error("This attempt has no information, please try again")
       }
-      const mappedQuestion : Question[] = data.attemptDetails.map((detail) => ({
-        id: detail.id,
-        text: detail.questionText,
-        options: [
-          { key: 'A', text: detail.optionA },
-          { key: 'B', text: detail.optionB },
-          { key: 'C', text: detail.optionC },
-          { key: 'D', text: detail.optionD }
-        ],
-        correctAnswer: detail.correctAnswer,
-        userAnswer: detail.userAnswer,
-        isCorrect: detail.isCorrect
-      }))
+      const mappedQuestion : AttemptQuestion[] = toAttemptQuestion(data.attemptDetails)
 
       const score = mappedQuestion.filter(q => q.isCorrect).length
       const total = mappedQuestion.length
       const percent = Math.round((score / total) * 100)
-      const result : Result = { score: score, total: total, percent: percent, questions: mappedQuestion }
+      const result : AttemptResult = { score: score, total: total, percent: percent, questions: mappedQuestion }
       setResult(result)
     } catch (error : any) {
       setError(error.message)
@@ -132,7 +106,7 @@ const QuizResultPage = () => {
                         <div>
                           Correct answer:{' '}
                           <span className='text-green-700 font-medium'>
-                          {q.options.find((o) => o.key === q.correctAnswer)?.text}
+                          {q.options.find((o) => o.key === q.correctOption)?.text}
                         </span>
                         </div>
                       )}

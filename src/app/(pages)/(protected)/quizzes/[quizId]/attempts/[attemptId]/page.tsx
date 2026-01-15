@@ -7,22 +7,15 @@ import { QuizAttempt } from '@/types/quiz-attempt'
 import { finishAttempt, getQuizAttempt, startQuizAttempt, updateAttemptProgress } from '@/services/quiz.service'
 import { useParams } from 'next/navigation'
 import { useNav } from '@/hooks/use-nav'
-
-interface Question {
-  id: number
-  text: string
-  options: { key: string; text: string }[]
-  correctOption?: string
-  userAnswer?: string
-  isCorrect?: boolean
-}
+import { AttemptQuestion } from '@/types/quesiton.type'
+import { toAttemptQuestion } from '@/mapper/attempt-mapper'
 
 const QuizQuestionPage = () => {
   const nav = useNav()
 
   const { quizId, attemptId } = useParams()
-  const [attempt, setAttempt] = useState<QuizAttempt | null>();
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [attempt, setAttempt] = useState<QuizAttempt | null>(); // Original attempts returned from backend
+  const [questions, setQuestions] = useState<AttemptQuestion[]>([]); // Map to lists
 
   const [current, setCurrent] = useState(0)
   const [answers, setAnswers] = useState<(string | null)[]>([])
@@ -41,19 +34,7 @@ const QuizQuestionPage = () => {
         throw new Error("This attempt has no information, please try again")
       }
 
-      const mappedQuestions : Question[] = data.attemptDetails.map((detail) => ({
-        id: detail.id,
-        text: detail.questionText,
-        options: [
-          { key: 'A', text: detail.optionA },
-          { key: 'B', text: detail.optionB },
-          { key: 'C', text: detail.optionC },
-          { key: 'D', text: detail.optionD }
-        ],
-        correctOption: detail.correctAnswer,
-        userAnswer: detail.userAnswer,
-        isCorrect: detail.isCorrect
-      }))
+      const mappedQuestions : AttemptQuestion[] = toAttemptQuestion(data.attemptDetails)
       setAttempt(data)
       setQuestions(mappedQuestions)
       setAnswers(Array(mappedQuestions.length).fill(null))
@@ -79,7 +60,7 @@ const QuizQuestionPage = () => {
   }
 
   const handlePrev = () => setCurrent((prev) => Math.max(0, prev - 1))
-  // const handleNext = () => setCurrent((prev) => Math.min(questions.length - 1, prev + 1))
+
   const handleNext = async () => {
     const currentAnswer = answers[current]
     const currentQuestion = questions[current]
@@ -113,19 +94,7 @@ const QuizQuestionPage = () => {
         throw new Error("This attempt has no information, please try again")
       }
 
-      const mappedQuestions : Question[] = result.attemptDetails.map((detail) => ({
-        id: detail.id,
-        text: detail.questionText,
-        options: [
-          { key: 'A', text: detail.optionA },
-          { key: 'B', text: detail.optionB },
-          { key: 'C', text: detail.optionC },
-          { key: 'D', text: detail.optionD }
-        ],
-        correctOption: detail.correctAnswer,
-        userAnswer: detail.userAnswer,
-        isCorrect: detail.isCorrect
-      }))
+      const mappedQuestions : AttemptQuestion[] = toAttemptQuestion(result.attemptDetails)
       setAttempt(result)
       setQuestions(mappedQuestions)
 
@@ -210,7 +179,7 @@ const QuizQuestionPage = () => {
 
   if (loading) {
     return (
-      <p className="text-gray-500">Loading quiz...</p>
+      <p className="text-gray-500">Loading quizzes...</p>
     )
   }
 

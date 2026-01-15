@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Sparkles, FileText, BookOpen, CircleChevronLeft, Notebook } from 'lucide-react'
+import { FileText, BookOpen, CircleChevronLeft, Notebook } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { QuizAttempt } from '@/types/quiz-attempt'
@@ -73,6 +73,12 @@ const QuizPage = () => {
     }
   }
 
+  const handleDeleted = (deletedId: number) => {
+    setAttempts((prevAttempts) =>
+      prevAttempts.filter((attempt) => attempt.id !== deletedId)
+    )
+  }
+
   return (
     <>
       {/* Back to previous */}
@@ -119,11 +125,13 @@ const QuizPage = () => {
                 {paginatedAttempts.map((attempt) => (
                   <AttemptCard
                     quizId={attempt.quizId}
+                    quizTitle={quiz?.title || ""}
                     key={attempt.id}
                     id={attempt.id}
                     score={attempt.score}
                     totalQuestions={attempt.totalQuestion}
                     attemptAt={new Date(attempt.attemptAt)}
+                    onFinishDelete={() => handleDeleted(attempt.id)}
                   />
                 ))}
               </div>

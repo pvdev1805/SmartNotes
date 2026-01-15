@@ -11,10 +11,10 @@ interface AddToCollectionModalProps {
   objId: number // object's id
   objTitle: string // object's title
   orgCollectionId: number // object's origin collection's id
-  collections: Collection[] // Available choices
+  collections: Collection[] // available choices
   isAdding: boolean
-  onCancel: () => void
-  onConfirm: (collectionId: number) => void
+  onCancel: () => void // should trigger hiding modal in parent component
+  onConfirm: (collectionId: number) => void // should trigger next action in parent component
 }
 
 const AddToCollectionModal = ({

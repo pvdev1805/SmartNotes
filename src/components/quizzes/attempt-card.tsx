@@ -1,29 +1,36 @@
 'use client'
+
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Edit, Trash, Tag, MoreVertical } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Trash, MoreVertical } from 'lucide-react'
 import TimeAgo from '@/components/time-ago'
 import { MouseEvent, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { AttemptDetail } from '@/types/quiz-attempt'
 import { ROUTES } from '@/hooks/use-nav'
-// import { useRouter } from 'next/navigation'
+import { deleteAttempt } from '@/services/quiz.service'
+import DeleteConfirmationModal from '@/components/modals/delete-confirmation'
+
 interface AttemptCardProps {
   quizId: number
+  quizTitle: string
   id: number
   score: number
   totalQuestions: number
   attemptAt: Date
+  onFinishDelete: () => void // callback to remove deleted note
 }
 
-const AttemptCard = ({ quizId, id, score, totalQuestions, attemptAt }: AttemptCardProps) => {
+const AttemptCard = ({ quizId, quizTitle, id, score, totalQuestions, attemptAt, onFinishDelete }: AttemptCardProps) => {
   const [actionsOpen, setActionsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const cancelButtonRef = useRef<HTMLButtonElement>(null)
 
+  const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
   const MAX_TAGS_DISPLAY = 2
 
+  // ------ Handle action bar on each attempt cards ------ //
   const handleClickOutside = (event: MouseEvent | globalThis.MouseEvent) => {
     if (
       menuRef.current &&
@@ -36,32 +43,6 @@ const AttemptCard = ({ quizId, id, score, totalQuestions, attemptAt }: AttemptCa
     }
   }
 
-  const handleActionsToggle = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation()
-    setActionsOpen((prev) => !prev)
-  }
-
-  const handleEdit = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation()
-    setActionsOpen(false)
-    // Logic to handle edit action, e.g., redirect to edit page
-    // useRouter().push(`/notes/${id}/edit`)
-    console.log('Edit action triggered for quiz:', id)
-  }
-
-  const handleDelete = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation()
-    setActionsOpen(false)
-    // Logic to handle delete action, e.g., show confirmation dialog
-    // useRouter().push(`/notes/${id}/delete`)
-    console.log('Delete action triggered for quiz:', id)
-  }
-
-  const handleCancel = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation()
-    setActionsOpen(false)
-  }
-
   // Close actions menu when clicking outside
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside as EventListener)
@@ -69,6 +50,38 @@ const AttemptCard = ({ quizId, id, score, totalQuestions, attemptAt }: AttemptCa
       document.removeEventListener('mousedown', handleClickOutside as EventListener)
     }
   }, [actionsOpen])
+
+  const handleActionsToggle = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    setActionsOpen((prev) => !prev)
+  }
+
+  const handleCancel = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    setActionsOpen(false)
+  }
+
+  // ------ Handle deletion ------ //
+  const handleDelete = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    setActionsOpen(false)
+    setDeleteConfirmationOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    try {
+      setIsDeleting(true)
+
+      await deleteAttempt(quizId, id)
+
+      onFinishDelete()
+    } catch (error : any) {
+      console.log(error.message)
+    } finally {
+      setIsDeleting(false)
+      setDeleteConfirmationOpen(false)
+    }
+  }
 
   return (
     <>
@@ -131,6 +144,19 @@ const AttemptCard = ({ quizId, id, score, totalQuestions, attemptAt }: AttemptCa
           </>
         )}
         {/* End - Actions Menu */}
+
+        {/* Confirmation Modal */}
+        {deleteConfirmationOpen &&
+          <DeleteConfirmationModal
+            type="attempt"
+            id={id}
+            title={quizTitle}
+            isDeleting={isDeleting}
+            onCancel={() => setDeleteConfirmationOpen(false)}
+            onConfirm={handleConfirmDelete}
+          ></DeleteConfirmationModal>
+        }
+        {/* End - Confirmation Modal */}
       </Card>
     </>
   )

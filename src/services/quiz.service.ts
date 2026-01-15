@@ -94,7 +94,7 @@ export const getQuizAttempt = async (quizId : number, attemptId : number): Promi
   return apiRes.data
 }
 
-export const deleteAttemptBy = async (quizId : number, attemptId : number) => {
+export const deleteAttempt = async (quizId : number, attemptId : number) => {
   const response = await apiClient.delete(`${QUIZ_BASE_API}/${quizId}/attempts/${attemptId}`)
   const apiRes: ApiResponse<QuizAttempt> = response.data
 

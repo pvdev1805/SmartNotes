@@ -1,8 +1,6 @@
 import apiClient from '@/apis/api-client'
 import { ApiResponse } from '@/types/auth.type'
 import { QuizSet } from '@/types/quiz-set.type'
-import { QuizAttempt } from '@/types/quiz-attempt'
-import { Quiz } from '@/types/quiz.type'
 
 const QUIZ_SET_BASE_API = '/quiz-sets'
 

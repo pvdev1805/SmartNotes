@@ -6,8 +6,8 @@ interface ConfirmationModalProps {
   id: number
   title: string
   isDeleting: boolean
-  onCancel: () => void
-  onConfirm: () => void
+  onCancel: () => void // should trigger hiding modal in parent component
+  onConfirm: () => void // should trigger next action in parent component
 }
 
 const DeleteConfirmationModal = ({ type, id, title, isDeleting, onCancel, onConfirm } : ConfirmationModalProps) => {
