@@ -3,19 +3,19 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Sparkles, FileText, BookOpen, CircleChevronLeft } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useNav } from '@/hooks/use-nav'
 
 const QuizGenerationPage = () => {
-  const router = useRouter()
+  const nav = useNav()
 
   const allowLearnMore = false;
 
   const handleBackToQuizzes = () => {
-    router.push('/quizzes')
+    nav.toQuizList()
   }
 
   const handleRedirectToCreateQuiz = () => {
-    router.push('/quizzes/generation/note')
+    nav.toQuizGenerationFromNote()
   }
 
   return (

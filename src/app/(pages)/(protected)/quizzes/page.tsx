@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Plus, Search, Filter, Notebook, ChevronRight, Folder, MoreVertical } from 'lucide-react'
+import { Plus, Search, Filter, Notebook } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
@@ -11,26 +11,28 @@ import QuizCard from '@/components/quizzes/quiz-card'
 import { Quiz } from '@/types/quiz.type'
 import { getAllQuizSets } from '@/services/quiz-set.service'
 import { useNav } from '@/hooks/use-nav'
-import { useRouter } from 'next/navigation'
 import { getAllQuizzes } from '@/services/quiz.service'
 import { QuizSet } from '@/types/quiz-set.type'
 import QuizSetCard from '@/components/quizzes/quiz-set-card'
 
 const QuizzesListPage = () => {
-  const router = useRouter()
   const nav = useNav()
 
-  const [search, setSearch] = useState('')
   const [quizzes, setQuizzes] = useState<Quiz[]>([])
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
   const [quizSets, setQuizSets] = useState<QuizSet[]>([])
   const [quizSetLoading, setQuizSetLoading] = useState(true)
 
+  // Search & filter
+  const [search, setSearch] = useState('')
+  const [error, setError] = useState('')
+
   const allowSearch = false;
   const allowFilter = false;
 
+  // ------ Fetching data (quizzes and quiz sets) ------ //
+  // Fetch quizzes
   const fetchData = async () => {
     setLoading(true)
     setError('')
@@ -64,6 +66,25 @@ const QuizzesListPage = () => {
     fetchCollections()
   }, [])
 
+
+  // ------ Handle AFTER deletion (update list) ------ //
+  const handleDeleted = (deletedId: number) => {
+    setQuizzes((prevQuizzes) => prevQuizzes.filter((quiz) => quiz.id !== deletedId))
+  }
+
+  // ------ Handle AFTER renamed (update list) ------ //
+  const handleQuizSetRenamed = () => {
+    fetchCollections()
+  }
+
+  // ------ Handle AFTER deletion (update list) ------ //
+  const handleQuizSetDeleted = (deletedId: number) => {
+    // Delete a quiz set may result in deleting all quizzes in it
+    fetchData()
+    fetchCollections()
+  }
+
+  // ------ Filter, search and pagination ------ //
   const filteredData = quizzes.filter(
     (quizSet) =>
       quizSet.title.toLowerCase().includes(search.toLowerCase())
@@ -87,20 +108,6 @@ const QuizzesListPage = () => {
 
   const handlePageChange = (page: number) => {
     setQueryParam('page', String(page))
-  }
-
-  const handleDeleted = (deletedId: number) => {
-    setQuizzes((prevQuizzes) => prevQuizzes.filter((quiz) => quiz.id !== deletedId))
-  }
-
-  const handleQuizSetRenamed = () => {
-    fetchCollections()
-  }
-
-  const handleQuizSetDeleted = (deletedId: number) => {
-    // Delete a quiz set may result in deleting all quizzes in it
-    fetchData()
-    fetchCollections()
   }
 
   return (

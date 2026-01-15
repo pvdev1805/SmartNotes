@@ -1,8 +1,7 @@
 'use client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Edit, Trash, Tag, MoreVertical, FolderPlus } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { Trash, MoreVertical, FolderPlus } from 'lucide-react'
 import TimeAgo from '@/components/time-ago'
 import { MouseEvent, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
@@ -11,7 +10,7 @@ import { deleteQuiz, updateQuiz } from '@/services/quiz.service'
 import DeleteConfirmationModal from '@/components/modals/delete-confirmation'
 import CollectionSelection from '@/components/modals/collection-selection'
 import { getAllQuizSets } from '@/services/quiz-set.service'
-import { QuizSet } from '@/types/quiz-set.type'
+import { QuizCollection } from '@/types/quiz-set.type'
 
 interface QuizCardProps {
   id: number
@@ -21,11 +20,6 @@ interface QuizCardProps {
   createdAt: Date
   onFinishCollectionChange: () => void
   onFinishDelete: () => void // callback to remove deleted note
-}
-
-interface Collection {
-  id: number
-  title: string
 }
 
 const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, onFinishCollectionChange, onFinishDelete }: QuizCardProps) => {
@@ -39,10 +33,11 @@ const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, onFinishCol
 
   const [collectionSelectionOpen, setCollectionSelectionOpen] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
-  const [collection, setCollection] = useState<Collection[]>([])
+  const [collection, setCollection] = useState<QuizCollection[]>([])
 
   const MAX_TAGS_DISPLAY = 2
 
+  // ------ Handle action bar on each card ------ //
   const handleClickOutside = (event: MouseEvent | globalThis.MouseEvent) => {
     if (
       menuRef.current &&
@@ -55,17 +50,31 @@ const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, onFinishCol
     }
   }
 
+  // Close actions menu when clicking outside
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside as EventListener)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside as EventListener)
+    }
+  }, [actionsOpen])
+
   const handleActionsToggle = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
     setActionsOpen((prev) => !prev)
   }
 
+  const handleCancel = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    setActionsOpen(false)
+  }
+
+  // ------ Handle add quiz to collection ------ //
   const handleAddToCollection = async (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
     setActionsOpen(false)
 
     const result = await getAllQuizSets()
-    const mappedCollection: Collection[] = result.map((quizSet) => ({
+    const mappedCollection: QuizCollection[] = result.map((quizSet) => ({
       id: quizSet.id,
       title: quizSet.originType === "DEFAULT" ? "DEFAULT" : quizSet.title
     }))
@@ -73,22 +82,6 @@ const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, onFinishCol
 
     setCollectionSelectionOpen(true)
     console.log('Add to collection action triggered for quiz:', id)
-  }
-
-  const handleEdit = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation()
-    setActionsOpen(false)
-    // Logic to handle edit action, e.g., redirect to edit page
-    // useRouter().push(`/notes/${id}/edit`)
-    console.log('Edit action triggered for quiz:', id)
-  }
-
-  const handleDelete = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation()
-    setActionsOpen(false)
-    // Logic to handle delete action, e.g., show confirmation dialog
-    setDeleteConfirmationOpen(true)
-    console.log('Delete action triggered for quiz:', id)
   }
 
   const handleConfirmSelection = async (newQuizSetId: number) => {
@@ -110,6 +103,15 @@ const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, onFinishCol
     }
   }
 
+  // ------ Handle delete ------ //
+  const handleDelete = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    setActionsOpen(false)
+    // Logic to handle delete action, e.g., show confirmation dialog
+    setDeleteConfirmationOpen(true)
+    console.log('Delete action triggered for quiz:', id)
+  }
+
   const handleConfirmDelete = async () => {
     try {
       setIsDeleting(true)
@@ -125,18 +127,14 @@ const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, onFinishCol
     }
   }
 
-  const handleCancel = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation()
-    setActionsOpen(false)
-  }
-
-  // Close actions menu when clicking outside
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside as EventListener)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside as EventListener)
-    }
-  }, [actionsOpen])
+  // ------ Handle quiz edit (to be implemented) ------ //
+  // const handleEdit = (event: MouseEvent<HTMLButtonElement>) => {
+  //   event.stopPropagation()
+  //   setActionsOpen(false)
+  //   // Logic to handle edit action, e.g., redirect to edit page
+  //   // useRouter().push(`/notes/${id}/edit`)
+  //   console.log('Edit action triggered for quiz:', id)
+  // }
 
   return (
     <>

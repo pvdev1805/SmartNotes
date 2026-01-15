@@ -8,3 +8,9 @@ export interface QuizSet {
   createdAt: string
   updatedAt?: string
 }
+
+// For frontend display
+export interface QuizCollection {
+  id: number
+  title: string
+}

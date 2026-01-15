@@ -6,32 +6,31 @@ import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
 import useQueryConfig from '@/hooks/use-query-config'
 import useUpdateQueryParam from '@/hooks/use-update-query-param'
-import NoteCard from '@/components/notes/note-card'
 
-import { createQuizSet, getAllQuizSets, getQuizSet } from '@/services/quiz-set.service'
+import { createQuizSet, getAllQuizSets } from '@/services/quiz-set.service'
 import { QuizSet } from '@/types/quiz-set.type'
 import { useNav } from '@/hooks/use-nav'
-import { useParams } from 'next/navigation'
 import QuizSetCard from '@/components/quizzes/quiz-set-card'
 import QuizSetInfoModal from '@/components/quizzes/quiz-set-info-modal'
 
 const QuizSetsListPage = () => {
   const nav = useNav()
-  const { setId } = useParams()
 
-  const [search, setSearch] = useState('')
   const [quizSets, setQuizSets] = useState<QuizSet[]>([])
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
-  // Create new collection
   const [creationModalOpen, setCreationModalOpen] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
+
+  // Search & filter
+  const [search, setSearch] = useState('')
+  const [error, setError] = useState('')
 
   const allowSearch = false;
   const allowFilter = false;
 
-  const fetchData = async (id: number) => {
+  // ------ Fetching data ------ //
+  const fetchData = async () => {
     setLoading(true)
     setError('')
 
@@ -47,9 +46,36 @@ const QuizSetsListPage = () => {
   }
 
   useEffect(() => {
-    fetchData(Number(setId))
+    fetchData()
   }, [])
 
+  // ------ Handle AFTER deletion (update list) ------ //
+  const handleDeleted = (deletedId: number) => {
+    setQuizSets((prevQuizSets) =>
+      prevQuizSets.filter((quizSet) => quizSet.id !== deletedId)
+    )
+  }
+
+  // ------ Handle AFTER rename (update list) ------ //
+  const handleRenamed = () => {
+    fetchData()
+  }
+
+  // ------ Handle create new quiz set ------ //
+  const handleCreateQuizSet = async (title: string) => {
+    setIsCreating(true)
+    try {
+      const createdSet = await createQuizSet({ title })
+      setCreationModalOpen(false)
+      await fetchData()
+    } catch (error) {
+      console.error('Failed to create quiz set:', error)
+    } finally {
+      setIsCreating(false)
+    }
+  }
+
+  // ------ Filter, search and pagination ------ //
   const filteredData = quizSets.filter(
     (quizSet) =>
       quizSet.title.toLowerCase().includes(search.toLowerCase())
@@ -73,29 +99,6 @@ const QuizSetsListPage = () => {
 
   const handlePageChange = (page: number) => {
     setQueryParam('page', String(page))
-  }
-
-  const handleRenamed = () => {
-    fetchData(Number(setId))
-  }
-
-  const handleDeleted = (deletedId: number) => {
-    setQuizSets((prevQuizSets) =>
-      prevQuizSets.filter((quizSet) => quizSet.id !== deletedId)
-    )
-  }
-
-  const handleCreateQuizSet = async (title: string) => {
-    setIsCreating(true)
-    try {
-      const createdSet = await createQuizSet({ title })
-      setCreationModalOpen(false)
-      await fetchData(Number(setId))
-    } catch (error) {
-      console.error('Failed to create quiz set:', error)
-    } finally {
-      setIsCreating(false)
-    }
   }
 
   return (

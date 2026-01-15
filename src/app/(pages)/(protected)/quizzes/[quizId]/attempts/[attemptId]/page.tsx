@@ -12,18 +12,19 @@ import { toAttemptQuestion } from '@/mapper/attempt-mapper'
 
 const QuizQuestionPage = () => {
   const nav = useNav()
-
   const { quizId, attemptId } = useParams()
+
   const [attempt, setAttempt] = useState<QuizAttempt | null>(); // Original attempts returned from backend
   const [questions, setQuestions] = useState<AttemptQuestion[]>([]); // Map to lists
+  const [loading, setLoading] = useState(true)
 
   const [current, setCurrent] = useState(0)
   const [answers, setAnswers] = useState<(string | null)[]>([])
   const [submitted, setSubmitted] = useState(false)
 
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
 
+  // ------ Fetching data ------ //
   const fetchData = async (qid: number, aid: number) => {
     setLoading(true)
     setError('')
@@ -51,6 +52,19 @@ const QuizQuestionPage = () => {
     fetchData(Number(quizId), Number(attemptId));
   }, [quizId])
 
+  // ------ Handle start new attempt (after completion) ------ //
+  const handleNewQuizAttempt = async () => {
+    setError('')
+
+    try {
+      const newAttempt = await startQuizAttempt(Number(quizId))
+      nav.toNewQuizAttempt(Number(quizId), newAttempt.id)
+    } catch (error : any) {
+      setError(error.message)
+    }
+  }
+
+  // ------ Handle attempt's progress ------ //
   const handleSelect = (optionKey: string) => {
     setAnswers((prev) => {
       const updated = [...prev]
@@ -99,17 +113,6 @@ const QuizQuestionPage = () => {
       setQuestions(mappedQuestions)
 
       setSubmitted(true)
-    } catch (error : any) {
-      setError(error.message)
-    }
-  }
-
-  const handleNewQuizAttempt = async () => {
-    setError('')
-
-    try {
-      const newAttempt = await startQuizAttempt(Number(quizId))
-      nav.toNewQuizAttempt(Number(quizId), newAttempt.id)
     } catch (error : any) {
       setError(error.message)
     }

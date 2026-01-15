@@ -12,13 +12,14 @@ import { toAttemptQuestion } from '@/mapper/attempt-mapper'
 
 const QuizResultPage = () => {
   const nav = useNav()
-
   const { quizId, attemptId } = useParams()
 
   const [result, setResult] = useState<AttemptResult>({score: 0, total: 0, percent: 0, questions: []});
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
+  const [error, setError] = useState('')
+
+  // ------ Fetching data ------ //
   const fetchData = async (qid: number, aid: number) => {
     setLoading(true)
     setError('')

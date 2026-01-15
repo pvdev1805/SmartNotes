@@ -4,8 +4,7 @@ import { Folder, FolderPlus, MoreVertical, Pencil, Trash } from 'lucide-react'
 import { useNav } from '@/hooks/use-nav'
 import { Button } from '@/components/ui/button'
 import DeleteConfirmationModal from '@/components/modals/delete-confirmation'
-import { MouseEvent, useRef, useState } from 'react'
-import { deleteQuiz } from '@/services/quiz.service'
+import { MouseEvent, useEffect, useRef, useState } from 'react'
 import { deleteQuizSet, updateQuizSet } from '@/services/quiz-set.service'
 import { Card } from '@/components/ui/card'
 import QuizSetInfoModal from '@/components/quizzes/quiz-set-info-modal'
@@ -32,29 +31,48 @@ const QuizSetCard = ({ id, originType, title, onFinishRename, onFinishDelete }: 
   const [renameModalOpen, setRenameModalOpen] = useState(false)
   const [isRenaming, setIsRenaming] = useState(false)
 
-  const handleCollectionClick = (collectionId: number) => {
-    nav.toQuizCollection(collectionId)
+  // ------ Handle action bar on each card ------ //
+  const handleClickOutside = (event: MouseEvent | globalThis.MouseEvent) => {
+    if (
+      menuRef.current &&
+      !menuRef.current.contains(event.target as Node) &&
+      cancelButtonRef.current &&
+      !cancelButtonRef.current.contains(event.target as Node) &&
+      actionsOpen
+    ) {
+      setActionsOpen(false)
+    }
   }
+
+  // Close actions menu when clicking outside
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside as EventListener)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside as EventListener)
+    }
+  }, [actionsOpen])
 
   const handleActionsToggle = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
     setActionsOpen((prev) => !prev)
   }
 
+  const handleCancel = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    setActionsOpen(false)
+  }
+
+  // ------ Handle card click ------ //
+  const handleCollectionClick = (collectionId: number) => {
+    nav.toQuizCollection(collectionId)
+  }
+
+  // ------ Handle rename ------ //
   const handleRename = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
     setActionsOpen(false)
 
     setRenameModalOpen(true)
-    console.log('Rename action triggered for quiz-set:', id)
-  }
-
-  const handleDelete = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation()
-    setActionsOpen(false)
-    // Logic to handle delete action, e.g., show confirmation dialog
-    setDeleteConfirmationOpen(true)
-    console.log('Delete action triggered for quiz-set:', id)
   }
 
   const handleConfirmRename = async (newTitle: string) => {
@@ -73,6 +91,13 @@ const QuizSetCard = ({ id, originType, title, onFinishRename, onFinishDelete }: 
     }
   }
 
+  // ------ Handle delete ------ //
+  const handleDelete = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation()
+    setActionsOpen(false)
+    setDeleteConfirmationOpen(true)
+  }
+
   const handleConfirmDelete = async () => {
     try {
       setIsDeleting(true)
@@ -86,11 +111,6 @@ const QuizSetCard = ({ id, originType, title, onFinishRename, onFinishDelete }: 
       setIsDeleting(false)
       setDeleteConfirmationOpen(false)
     }
-  }
-
-  const handleCancel = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation()
-    setActionsOpen(false)
   }
 
   return (

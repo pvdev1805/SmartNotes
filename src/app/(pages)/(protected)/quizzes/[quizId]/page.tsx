@@ -17,14 +17,15 @@ import { useNav } from '@/hooks/use-nav'
 
 const QuizPage = () => {
   const nav = useNav()
-
   const { quizId } = useParams()
+
   const [quiz, setQuiz] = useState<Quiz | null>(null)
   const [attempts, setAttempts] = useState<QuizAttempt[]>([])
-
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
+  const [error, setError] = useState('')
+
+  // ------ Fetching data ------ //
   const fetchData = async (id: number) => {
     setLoading(true)
     setError('')
@@ -50,17 +51,14 @@ const QuizPage = () => {
     fetchData(Number(quizId));
   }, [quizId])
 
-  const pageSize = 6
-  const queryConfig = useQueryConfig()
-  const setQueryParam = useUpdateQueryParam()
-  const currentPage = Number(queryConfig.page) || 1
-
-  const paginatedAttempts = attempts.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-
-  const handlePageChange = (page: number) => {
-    setQueryParam('page', String(page))
+  // ------ Handle AFTER deletion (update list) ------ //
+  const handleDeleted = (deletedId: number) => {
+    setAttempts((prevAttempts) =>
+      prevAttempts.filter((attempt) => attempt.id !== deletedId)
+    )
   }
 
+  // ------ Handle start new attempt ------ //
   const handleStartNewAttempt = async () => {
     setError('')
 
@@ -73,10 +71,16 @@ const QuizPage = () => {
     }
   }
 
-  const handleDeleted = (deletedId: number) => {
-    setAttempts((prevAttempts) =>
-      prevAttempts.filter((attempt) => attempt.id !== deletedId)
-    )
+  // ------ Filter, search and pagination ------ //
+  const pageSize = 6
+  const queryConfig = useQueryConfig()
+  const setQueryParam = useUpdateQueryParam()
+  const currentPage = Number(queryConfig.page) || 1
+
+  const paginatedAttempts = attempts.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+
+  const handlePageChange = (page: number) => {
+    setQueryParam('page', String(page))
   }
 
   return (
