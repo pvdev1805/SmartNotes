@@ -15,6 +15,7 @@ export interface NoteUpdateRequest {
   content: string
 }
 
+// Pagination
 export interface NotePage {
   pageData: Note[]
   pageInfo: PageInfo

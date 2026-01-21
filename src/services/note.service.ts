@@ -14,9 +14,9 @@ export const createNote = async (request: NoteUpdateRequest): Promise<Note> => {
   return apiRes.data
 }
 
-export const getAllNotes = async (page: number, size: number): Promise<NotePage> => {
+export const getAllNotes = async (page: number, size: number, query?: string): Promise<NotePage> => {
   const response = await apiClient.get(
-    `${NOTE_BASE_API}?page=${page}&size=${size}`)
+    `${NOTE_BASE_API}?page=${page}&size=${size}&${query}`)
   const apiRes: ApiResponse<NotePage> = response.data
 
   if (!apiRes.data && apiRes.code != 1000) {

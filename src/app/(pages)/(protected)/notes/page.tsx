@@ -1,13 +1,11 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Plus, Search, Filter, Notebook } from 'lucide-react'
+import { Plus, Search, Notebook, Filter, XCircle, Eraser } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Pagination from '@/components/pagination'
-import useQueryConfig from '@/hooks/use-query-config'
-import useUpdateQueryParam from '@/hooks/use-update-query-param'
 import NoteCard from '@/components/notes/note-card'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 import { getAllNotes } from '@/services/note.service'
 import { Note } from '@/types/note.type'
@@ -15,28 +13,45 @@ import FadeInSection from '@/components/animations/fade-in-section'
 import AnimatedList from '@/components/animations/animated-list'
 import FadeInItem from '@/components/animations/fade-in-item'
 import { PageInfo } from '@/types/util.type'
+import useQuery from '@/hooks/use-query'
+import SortPopover from '@/components/common/sort-popover'
+import FilterPopover from '@/components/common/filter-popover'
+
+const filterCriteria = [
+  { key: 'createdFrom', label: 'Created From', inputType: 'date' },
+  { key: 'createdTo', label: 'Created Before', inputType: 'date' },
+  { key: 'updatedFrom', label: 'Updated From', inputType: 'date' },
+  { key: 'updatedTo', label: 'Updated Before', inputType: 'date' }
+]
+
+const sortCriteria = [
+  { value: 'createdAt', label: 'Created At' },
+  { value: 'updatedAt', label: 'Updated At' },
+  { value: 'title', label: 'Title' }
+]
 
 const NotesListPage = () => {
   const router = useRouter()
 
-  const [search, setSearch] = useState('')
   const [notes, setNotes] = useState<Note[]>([])
   const [page, setPage] = useState<PageInfo>({ currentPage: 1, pageSize: 6, totalPages: 0, totalElements: 0 })
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
 
-  const allowSearch = false
-  const allowFilter = false
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const [search, setSearch] = useState('')
+  const [resetTrigger, setResetTrigger] = useState(false)
+  const searchParams = useSearchParams()
+  const { setQuery, removeQuery, clearQuery } = useQuery()
 
   const fetchData = async (pageNum: number) => {
     setLoading(true)
     setError('')
 
     try {
-      const data = await getAllNotes(pageNum, page.pageSize)
+      const data = await getAllNotes(pageNum, page.pageSize, searchParams.toString())
       setNotes(data.pageData)
       setPage(data.pageInfo)
-      console.log(data.pageInfo)
     } catch (error: any) {
       setNotes([])
       setError(error.message)
@@ -47,49 +62,50 @@ const NotesListPage = () => {
 
   useEffect(() => {
     fetchData(page.currentPage)
-  }, [])
+  }, [searchParams])
 
-  const filteredNotes = notes.filter(
-    (note) =>
-      note.title.toLowerCase().includes(search.toLowerCase()) ||
-      note.content.toLowerCase().includes(search.toLowerCase()) // ||
-    // note.tags.some((tag) => tag.toLowerCase().includes(search.toLowerCase()))
-  )
-
-  const pageSize = 6
-  const queryConfig = useQueryConfig()
-  const setQueryParam = useUpdateQueryParam()
-  const currentPage = Number(queryConfig.page) || 1
-
-  const paginatedNotes = filteredNotes.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let keyword = e.target.value
-    if (keyword.trim() === '') {
-      setSearch('')
-    } else {
+    if (keyword.trim() != '') {
       setSearch(keyword)
+      setQuery('keyword', keyword)
+    } else {
+      setSearch('')
+      removeQuery('keyword')
     }
-
-    // Reset to first page on new search
-    if (currentPage !== 1) {
-      setQueryParam('page', '1')
-    }
-  }
-
-  const handlePageChange = (pageNumber: number) => {
-    setPage((prevState) => ({
-      ...prevState,
-      currentPage: pageNumber
-    }))
-    setQueryParam('page', String(page))
-    fetchData(pageNumber)
   }
 
   const handleNoteDeleted = (deletedNoteId: number) => {
     setNotes((prevNotes) => prevNotes.filter((note) => note.id !== deletedNoteId))
     router.refresh()
   }
+
+  // ------ Pagination, Search, Filter and Sort ------ //
+  const handlePageChange = (pageNumber: number) => {
+    setPage((prevState) => ({ ...prevState, currentPage: pageNumber }))
+    setQuery('page', pageNumber)
+  }
+
+  const handleClearQuery = () => {
+    setSearch('')
+    setResetTrigger(!resetTrigger)
+    clearQuery()
+  }
+
+  const handleSortInputChange = (sortBy : string, sortOrder : string) => {
+    if (sortBy !== '' && sortOrder !== '') {
+      setQuery('sortBy', sortBy)
+      setQuery('sortOrder', sortOrder)
+    }
+  }
+
+  const handleFilterInputChange = (filters: Record<string, string>) => {
+    Object.entries(filters).forEach(([key, value]) => {
+      setQuery(key, value)
+    })
+  }
+
 
   return (
     <div className='min-h-screen bg-gray-50 px-4 py-4 overflow-hidden'>
@@ -121,16 +137,28 @@ const NotesListPage = () => {
               placeholder='Search notes...'
               value={search}
               onChange={handleSearchInputChange}
-              className={`w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 
-              ${!allowSearch ? 'opacity-80 bg-gray-50' : 'bg-white shadow-sm'}
-              `}
-              disabled={!allowSearch}
+              className='w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white shadow-sm'
             />
           </div>
-          <Button variant='outline' className='flex items-center gap-2' disabled={!allowFilter}>
-            <Filter className='w-5 h-5' />
-            Filter
-          </Button>
+          <div className="flex items-center gap-2">
+            <FilterPopover
+              criteria={filterCriteria}
+              resetTrigger={resetTrigger}
+              onApply={handleFilterInputChange}
+            />
+            <SortPopover
+              criteria={sortCriteria}
+              resetTrigger={resetTrigger}
+              onApply={handleSortInputChange}
+            />
+            <Button
+              variant='outline'
+              onClick={handleClearQuery}
+              className='flex items-center gap-2 border-red-300 text-red-600 bg-red-50 hover:bg-red-100'>
+              <Eraser  className="w-5 h-5" />
+              Reset
+            </Button>
+          </div>
         </div>
       </FadeInSection>
 
@@ -152,14 +180,14 @@ const NotesListPage = () => {
       <FadeInSection>
         {loading ? (
           <p className='text-gray-500'>Loading notes...</p>
-        ) : !error && filteredNotes.length === 0 ? (
+        ) : !error && notes.length === 0 ? (
           <div className='text-center text-gray-500 py-16'>
             <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
             <p className='text-lg'>No notes found. Try a different search or add a new note!</p>
           </div>
         ) : (
           <AnimatedList className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {paginatedNotes.map((note) => (
+            {notes.map((note) => (
               <FadeInItem key={note.id}>
                 <NoteCard
                   id={note.id}
@@ -184,15 +212,6 @@ const NotesListPage = () => {
           currentPage={page.currentPage}
           onPageChange={handlePageChange}
         />
-
-        {/*{filteredNotes.length > pageSize && (*/}
-        {/*  <Pagination*/}
-        {/*    total={filteredNotes.length}*/}
-        {/*    pageSize={pageSize}*/}
-        {/*    currentPage={currentPage}*/}
-        {/*    onPageChange={handlePageChange}*/}
-        {/*  />*/}
-        {/*)}*/}
       </FadeInSection>
       {/* End - Pagination */}
     </div>

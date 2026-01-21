@@ -17,8 +17,7 @@ const Pagination = ({ total, pageSize, currentPage, onPageChange }: PaginationPr
       <button
         className='px-2 py-1 rounded border bg-white text-black disabled:opacity-50'
         disabled={currentPage === 1}
-        // onClick={() => onPageChange(currentPage - 1)}
-        onClick={() => onPageChange(currentPage)}
+        onClick={() => onPageChange(currentPage - 1)}
         aria-label='Previous page'
       >
         <ChevronLeft className='w-6 h-6' />
