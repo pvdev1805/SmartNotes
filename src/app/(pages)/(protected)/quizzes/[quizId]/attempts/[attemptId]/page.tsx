@@ -1,127 +1,70 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-
-const mockQuestions = [
-  {
-    id: 1,
-    text: 'Which one is NOT a JavaScript framework?',
-    options: [
-      { key: 'A', text: 'React' },
-      { key: 'B', text: 'Angular' },
-      { key: 'C', text: 'Vue' },
-      { key: 'D', text: 'Laravel' }
-    ],
-    correctOption: 'D'
-  },
-  {
-    id: 2,
-    text: 'What does HTML stand for?',
-    options: [
-      { key: 'A', text: 'Hyper Trainer Marking Language' },
-      { key: 'B', text: 'Hyper Text Markup Language' },
-      { key: 'C', text: 'Hyper Text Marketing Language' },
-      { key: 'D', text: 'Hyper Text Markup Leveler' }
-    ],
-    correctOption: 'B'
-  },
-  {
-    id: 3,
-    text: 'Which company developed TypeScript?',
-    options: [
-      { key: 'A', text: 'Facebook' },
-      { key: 'B', text: 'Microsoft' },
-      { key: 'C', text: 'Google' },
-      { key: 'D', text: 'Amazon' }
-    ],
-    correctOption: 'B'
-  },
-  {
-    id: 4,
-    text: 'Which is a backend language?',
-    options: [
-      { key: 'A', text: 'Python' },
-      { key: 'B', text: 'CSS' },
-      { key: 'C', text: 'HTML' },
-      { key: 'D', text: 'Sass' }
-    ],
-    correctOption: 'A'
-  },
-  {
-    id: 5,
-    text: 'What is the output of 2 + "2" in JavaScript?',
-    options: [
-      { key: 'A', text: '4' },
-      { key: 'B', text: '"22"' },
-      { key: 'C', text: 'NaN' },
-      { key: 'D', text: 'undefined' }
-    ],
-    correctOption: 'B'
-  },
-  {
-    id: 6,
-    text: 'Which tag is used for the largest heading in HTML?',
-    options: [
-      { key: 'A', text: '<h1>' },
-      { key: 'B', text: '<h6>' },
-      { key: 'C', text: '<head>' },
-      { key: 'D', text: '<header>' }
-    ],
-    correctOption: 'A'
-  },
-  {
-    id: 7,
-    text: 'Which of these is a NoSQL database?',
-    options: [
-      { key: 'A', text: 'MySQL' },
-      { key: 'B', text: 'PostgreSQL' },
-      { key: 'C', text: 'MongoDB' },
-      { key: 'D', text: 'Oracle' }
-    ],
-    correctOption: 'C'
-  },
-  {
-    id: 8,
-    text: 'Which CSS property changes text color?',
-    options: [
-      { key: 'A', text: 'font-style' },
-      { key: 'B', text: 'color' },
-      { key: 'C', text: 'background-color' },
-      { key: 'D', text: 'text-decoration' }
-    ],
-    correctOption: 'B'
-  },
-  {
-    id: 9,
-    text: 'Which is a JavaScript data type?',
-    options: [
-      { key: 'A', text: 'float' },
-      { key: 'B', text: 'number' },
-      { key: 'C', text: 'decimal' },
-      { key: 'D', text: 'character' }
-    ],
-    correctOption: 'B'
-  },
-  {
-    id: 10,
-    text: 'Which HTML attribute is used for an image source?',
-    options: [
-      { key: 'A', text: 'src' },
-      { key: 'B', text: 'href' },
-      { key: 'C', text: 'alt' },
-      { key: 'D', text: 'link' }
-    ],
-    correctOption: 'A'
-  }
-]
+import { QuizAttempt } from '@/types/quiz-attempt'
+import { finishAttempt, getQuizAttempt, startQuizAttempt, updateAttemptProgress } from '@/services/quiz.service'
+import { useParams } from 'next/navigation'
+import { useNav } from '@/hooks/use-nav'
+import { AttemptQuestion } from '@/types/quesiton.type'
+import { toAttemptQuestion } from '@/mapper/attempt-mapper'
 
 const QuizQuestionPage = () => {
+  const nav = useNav()
+  const { quizId, attemptId } = useParams()
+
+  const [attempt, setAttempt] = useState<QuizAttempt | null>(); // Original attempts returned from backend
+  const [questions, setQuestions] = useState<AttemptQuestion[]>([]); // Map to lists
+  const [loading, setLoading] = useState(true)
+
   const [current, setCurrent] = useState(0)
-  const [answers, setAnswers] = useState<(string | null)[]>(Array(mockQuestions.length).fill(null))
+  const [answers, setAnswers] = useState<(string | null)[]>([])
   const [submitted, setSubmitted] = useState(false)
 
+  const [error, setError] = useState('')
+
+  // ------ Fetching data ------ //
+  const fetchData = async (qid: number, aid: number) => {
+    setLoading(true)
+    setError('')
+
+    try {
+      const data = await getQuizAttempt(qid, aid)
+      if (!data.attemptDetails) {
+        throw new Error("This attempt has no information, please try again")
+      }
+
+      const mappedQuestions : AttemptQuestion[] = toAttemptQuestion(data.attemptDetails)
+      setAttempt(data)
+      setQuestions(mappedQuestions)
+      setAnswers(Array(mappedQuestions.length).fill(null))
+    } catch (error : any) {
+      setAttempt(null)
+      setQuestions([])
+      setError(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData(Number(quizId), Number(attemptId));
+  }, [quizId])
+
+  // ------ Handle start new attempt (after completion) ------ //
+  const handleNewQuizAttempt = async () => {
+    setError('')
+
+    try {
+      const newAttempt = await startQuizAttempt(Number(quizId))
+      nav.toNewQuizAttempt(Number(quizId), newAttempt.id)
+    } catch (error : any) {
+      setError(error.message)
+    }
+  }
+
+  // ------ Handle attempt's progress ------ //
   const handleSelect = (optionKey: string) => {
     setAnswers((prev) => {
       const updated = [...prev]
@@ -131,13 +74,53 @@ const QuizQuestionPage = () => {
   }
 
   const handlePrev = () => setCurrent((prev) => Math.max(0, prev - 1))
-  const handleNext = () => setCurrent((prev) => Math.min(mockQuestions.length - 1, prev + 1))
 
-  const handleSubmit = () => setSubmitted(true)
+  const handleNext = async () => {
+    const currentAnswer = answers[current]
+    const currentQuestion = questions[current]
+
+    // Only sync if user has selected an answer
+    if (currentAnswer && quizId && attemptId) {
+      try {
+        await updateAttemptProgress(
+          Number(quizId),
+          Number(attemptId),
+          {
+            id: currentQuestion.id,
+            userAnswer: currentAnswer
+          }
+        )
+      } catch (error: any) {
+        console.error('Failed to save answer:', error)
+        setError(error.message)
+      }
+    }
+
+    // Move to next question
+    setCurrent((prev) => Math.min(questions.length - 1, prev + 1))
+  }
+
+  const handleSubmit = async (qid: number, aid: number) => {
+    try {
+      const result = await finishAttempt(qid, aid)
+
+      if (!result.attemptDetails) {
+        throw new Error("This attempt has no information, please try again")
+      }
+
+      const mappedQuestions : AttemptQuestion[] = toAttemptQuestion(result.attemptDetails)
+      setAttempt(result)
+      setQuestions(mappedQuestions)
+
+      setSubmitted(true)
+    } catch (error : any) {
+      setError(error.message)
+    }
+  }
 
   // Calculate results
   const results = submitted
-    ? mockQuestions.map((q, idx) => ({
+    ? questions.map((q, idx) => ({
         correct: answers[idx] === q.correctOption,
         answered: answers[idx] !== null
       }))
@@ -150,13 +133,13 @@ const QuizQuestionPage = () => {
       <div className='min-h-screen flex flex-col items-center bg-gray-50 px-2 py-8'>
         <Card className='w-full max-w-xl shadow-lg rounded-xl p-8 bg-white'>
           <CardContent>
-            <h2 className='text-2xl font-bold text-gray-900 mb-4'>Quiz Results</h2>
+            <h2 className='text-2xl font-bold text-gray-900 mb-4'>Quiz Ended</h2>
             <div className='mb-4 text-lg'>
               You scored <span className='font-bold text-blue-700'>{score}</span> out of{' '}
-              <span className='font-bold'>{mockQuestions.length}</span>
+              <span className='font-bold'>{questions.length}</span>
             </div>
             <div className='mb-6'>
-              {mockQuestions.map((q, idx) => (
+              {questions.map((q, idx) => (
                 <div
                   key={q.id}
                   className={`mb-3 p-3 rounded-lg border ${
@@ -183,14 +166,27 @@ const QuizQuestionPage = () => {
                 </div>
               ))}
             </div>
-            <Button onClick={() => window.location.reload()}>Try Again</Button>
+
+            <div className='flex items-center justify-between mb-4'>
+              {/*<Button onClick={() => window.location.reload()}>Try Again</Button>*/}
+              <Button onClick={handleNewQuizAttempt}>Try New Attempt</Button>
+              <Button variant={'outline'} onClick={() => nav.toQuiz(Number(quizId))} className='flex items-center'>
+                Back to Quiz
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
     )
   }
 
-  const q = mockQuestions[current]
+  if (loading) {
+    return (
+      <p className="text-gray-500">Loading quizzes...</p>
+    )
+  }
+
+  const q = questions[current]
 
   return (
     <div className='min-h-screen flex flex-col items-center bg-gray-50 px-2 py-8'>
@@ -199,10 +195,10 @@ const QuizQuestionPage = () => {
           {/* Progress */}
           <div className='mb-4 flex items-center justify-between'>
             <span className='text-sm text-gray-500'>
-              Question {current + 1} of {mockQuestions.length}
+              Question {current + 1} of {questions.length}
             </span>
             <div className='flex gap-1'>
-              {mockQuestions.map((_, idx) => (
+              {questions.map((_, idx) => (
                 <span
                   key={idx}
                   className={`w-2 h-2 rounded-full ${
@@ -240,10 +236,10 @@ const QuizQuestionPage = () => {
             <Button variant='outline' onClick={handlePrev} disabled={current === 0}>
               Previous
             </Button>
-            {current < mockQuestions.length - 1 ? (
+            {current < questions.length - 1 ? (
               <Button onClick={handleNext}>Next</Button>
             ) : (
-              <Button onClick={handleSubmit} variant='default'>
+              <Button onClick={() => handleSubmit(Number(quizId), Number(attemptId))} variant='default' className='bg-green-600 hover:bg-green-700'>
                 Submit
               </Button>
             )}
