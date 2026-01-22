@@ -5,12 +5,12 @@ export interface Note {
   title: string
   content: string
   createdAt: string
-  updatedAt?: string
+  updatedAt: string
   tags?: string[]
   // isPinned?: boolean
 }
 
-export interface NoteUpdateRequest {
+export interface NoteUpsertRequest {
   title: string
   content: string
 }
@@ -20,15 +20,6 @@ export interface NotePage {
   pageData: Note[]
   pageInfo: PageInfo
 }
-
-// export interface NoteList {
-//   notes: Note[]
-//   pagination: {
-//     currentPage: number
-//     limit: number
-//     totalPages: number
-//   }
-// }
 
 export interface NoteListConfig {
   page?: number | string

@@ -4,6 +4,11 @@ import { useRouter } from 'next/navigation'
 
 export const ROUTES = {
   HOME: '/',
+  NOTE: {
+    LIST: '/notes',
+    NEW: '/notes/new',
+    DETAIL: (id: number | undefined) => `/notes/${id}`
+  },
   QUIZ: {
     LIST: '/quizzes',
     COLLECTION: (id: number | undefined) => `/quizzes/collections/${id}`,
@@ -21,6 +26,9 @@ export const useNav = () => {
 
   return {
     toHome: () => router.push(ROUTES.HOME),
+    back: () => router.back,
+    refresh: () => router.refresh(),
+    // Quizzes
     toQuizList: () => router.push(ROUTES.QUIZ.LIST),
     toQuizCollection: (id: number) => router.push(ROUTES.QUIZ.COLLECTION(id)),
     toQuizCollectionList: () => router.push(ROUTES.QUIZ.COLLECTION_LIST),
@@ -28,6 +36,9 @@ export const useNav = () => {
     toQuizGenerationFromNote: () => router.push(ROUTES.QUIZ.GENERATION_FROM_NOTE),
     toQuiz: (id: number | undefined) => router.push(ROUTES.QUIZ.DETAIL(id)),
     toNewQuizAttempt: (qid: number | undefined, aid: number | undefined) => router.push(ROUTES.QUIZ.ATTEMPT_DETAIL(qid, aid)),
-    refresh: () => router.refresh()
+    // Notes
+    toNoteList: () => router.push(ROUTES.NOTE.LIST),
+    toNoteCreation: () => router.push(ROUTES.NOTE.NEW),
+    toNote: (id: number | undefined) => router.push(ROUTES.NOTE.DETAIL(id))
   }
 }

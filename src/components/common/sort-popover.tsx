@@ -2,7 +2,7 @@ import { SortDesc } from 'lucide-react'
 import GenericPopover from '@/components/common/generic-popover'
 import { useEffect, useState } from 'react'
 
-interface SortCriterion {
+export interface SortCriterion {
   value: string
   label: string
 }
@@ -15,7 +15,7 @@ interface SortPopoverProps {
 
 const SortPopover = ({ criteria, resetTrigger, onApply } : SortPopoverProps) => {
   const [sortBy, setSortBy] = useState('');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   useEffect(() => {
     setSortBy('')

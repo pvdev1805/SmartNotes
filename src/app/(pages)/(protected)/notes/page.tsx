@@ -1,37 +1,37 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Plus, Search, Notebook, Filter, XCircle, Eraser } from 'lucide-react'
+import { Plus, Search, Notebook, Eraser } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Pagination from '@/components/pagination'
 import NoteCard from '@/components/notes/note-card'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 
 import { getAllNotes } from '@/services/note.service'
 import { Note } from '@/types/note.type'
 import FadeInSection from '@/components/animations/fade-in-section'
 import AnimatedList from '@/components/animations/animated-list'
-import FadeInItem from '@/components/animations/fade-in-item'
 import { PageInfo } from '@/types/util.type'
 import useQuery from '@/hooks/use-query'
-import SortPopover from '@/components/common/sort-popover'
-import FilterPopover from '@/components/common/filter-popover'
+import SortPopover, { SortCriterion } from '@/components/common/sort-popover'
+import FilterPopover, { FilterCriterion } from '@/components/common/filter-popover'
+import { useNav } from '@/hooks/use-nav'
 
-const filterCriteria = [
+const filterCriteria : FilterCriterion[] = [
   { key: 'createdFrom', label: 'Created From', inputType: 'date' },
   { key: 'createdTo', label: 'Created Before', inputType: 'date' },
   { key: 'updatedFrom', label: 'Updated From', inputType: 'date' },
   { key: 'updatedTo', label: 'Updated Before', inputType: 'date' }
 ]
 
-const sortCriteria = [
+const sortCriteria : SortCriterion[] = [
   { value: 'createdAt', label: 'Created At' },
   { value: 'updatedAt', label: 'Updated At' },
   { value: 'title', label: 'Title' }
 ]
 
 const NotesListPage = () => {
-  const router = useRouter()
+  const nav = useNav()
 
   const [notes, setNotes] = useState<Note[]>([])
   const [page, setPage] = useState<PageInfo>({ currentPage: 1, pageSize: 6, totalPages: 0, totalElements: 0 })
@@ -44,6 +44,7 @@ const NotesListPage = () => {
   const searchParams = useSearchParams()
   const { setQuery, removeQuery, clearQuery } = useQuery()
 
+  // ------ Fetching data ------ //
   const fetchData = async (pageNum: number) => {
     setLoading(true)
     setError('')
@@ -64,6 +65,16 @@ const NotesListPage = () => {
     fetchData(page.currentPage)
   }, [searchParams])
 
+  // ------ Handle AFTER deletion (update list) ------ //
+  const handleNoteDeleted = (deletedNoteId: number) => {
+    fetchData(page.currentPage) // Fetch again to reload paginated elements
+  }
+
+  // ------ Pagination, Search, Filter and Sort ------ //
+  const handlePageChange = (pageNumber: number) => {
+    setPage((prevState) => ({ ...prevState, currentPage: pageNumber }))
+    setQuery('page', pageNumber)
+  }
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let keyword = e.target.value
@@ -76,21 +87,10 @@ const NotesListPage = () => {
     }
   }
 
-  const handleNoteDeleted = (deletedNoteId: number) => {
-    setNotes((prevNotes) => prevNotes.filter((note) => note.id !== deletedNoteId))
-    router.refresh()
-  }
-
-  // ------ Pagination, Search, Filter and Sort ------ //
-  const handlePageChange = (pageNumber: number) => {
-    setPage((prevState) => ({ ...prevState, currentPage: pageNumber }))
-    setQuery('page', pageNumber)
-  }
-
-  const handleClearQuery = () => {
-    setSearch('')
-    setResetTrigger(!resetTrigger)
-    clearQuery()
+  const handleFilterInputChange = (filters: Record<string, string>) => {
+    Object.entries(filters).forEach(([key, value]) => {
+      setQuery(key, value)
+    })
   }
 
   const handleSortInputChange = (sortBy : string, sortOrder : string) => {
@@ -100,12 +100,11 @@ const NotesListPage = () => {
     }
   }
 
-  const handleFilterInputChange = (filters: Record<string, string>) => {
-    Object.entries(filters).forEach(([key, value]) => {
-      setQuery(key, value)
-    })
+  const handleClearQuery = () => {
+    setSearch('')
+    setResetTrigger(!resetTrigger)
+    clearQuery()
   }
-
 
   return (
     <div className='min-h-screen bg-gray-50 px-4 py-4 overflow-hidden'>
@@ -118,7 +117,7 @@ const NotesListPage = () => {
           </h1>
           <Button
             className='flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold px-4 py-2 rounded-lg shadow hover:from-blue-600 hover:to-purple-600 transition'
-            onClick={() => router.push('/notes/new')}
+            onClick={nav.toNoteCreation}
           >
             <Plus className='w-5 h-5' />
             New Note
@@ -188,17 +187,17 @@ const NotesListPage = () => {
         ) : (
           <AnimatedList className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {notes.map((note) => (
-              <FadeInItem key={note.id}>
-                <NoteCard
-                  id={note.id}
-                  title={note.title}
-                  description={note.content}
-                  createdAt={new Date(note.createdAt)}
-                  // tags={note.tags}
-                  tags={[]}
-                  onFinishDelete={handleNoteDeleted}
-                />
-              </FadeInItem>
+              <NoteCard
+                key={note.id}
+                id={note.id}
+                title={note.title}
+                description={note.content}
+                createdAt={new Date(note.createdAt)}
+                updatedAt={new Date(note.updatedAt)}
+                // tags={note.tags}
+                tags={[]}
+                onFinishDelete={handleNoteDeleted}
+              />
             ))}
           </AnimatedList>
         )}

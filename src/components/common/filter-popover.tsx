@@ -2,7 +2,7 @@ import { Filter } from 'lucide-react'
 import GenericPopover from '@/components/common/generic-popover'
 import { useEffect, useState } from 'react'
 
-interface FilterCriterion {
+export interface FilterCriterion {
   key: string
   label: string
   inputType: 'date' | 'datetime'
