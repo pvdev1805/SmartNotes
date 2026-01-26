@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { FileText, BookOpen, CircleChevronLeft, Notebook } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { QuizAttempt } from '@/types/quiz-attempt'
+import { QuizAttempt } from '@/types/quiz-attempt.type'
 import { Quiz } from '@/types/quiz.type'
 import { getAllQuizAttempts, getQuiz, startQuizAttempt } from '@/services/quiz.service'
 import AnimatedSection from '@/components/landing/animated-section'
@@ -14,6 +14,8 @@ import useQueryConfig from '@/hooks/use-query-config'
 import useUpdateQueryParam from '@/hooks/use-update-query-param'
 import AttemptCard from '@/components/quizzes/attempt-card'
 import { useNav } from '@/hooks/use-nav'
+import { PageInfo } from '@/types/util.type'
+import FadeInSection from '@/components/animations/fade-in-section'
 
 const QuizPage = () => {
   const nav = useNav()
@@ -21,23 +23,26 @@ const QuizPage = () => {
 
   const [quiz, setQuiz] = useState<Quiz | null>(null)
   const [attempts, setAttempts] = useState<QuizAttempt[]>([])
+  const [page, setPage] = useState<PageInfo>({ currentPage: 1, pageSize: 6, totalPages: 0, totalElements: 0 })
+
   const [loading, setLoading] = useState(true)
 
   const [error, setError] = useState('')
 
   // ------ Fetching data ------ //
-  const fetchData = async (id: number) => {
+  const fetchData = async (id: number, pageNum: number) => {
     setLoading(true)
     setError('')
 
     try {
       const [quizData, attemptsData] = await Promise.all([
         getQuiz(id),
-        getAllQuizAttempts(id)
+        getAllQuizAttempts(id, pageNum, page.pageSize)
       ])
 
       setQuiz(quizData)
-      setAttempts(attemptsData)
+      setAttempts(attemptsData.pageData)
+      setPage(attemptsData.pageInfo)
     } catch (error : any) {
       setQuiz(null)
       setAttempts([])
@@ -48,7 +53,7 @@ const QuizPage = () => {
   }
 
   useEffect(() => {
-    fetchData(Number(quizId));
+    fetchData(Number(quizId), page.currentPage);
   }, [quizId])
 
   // ------ Handle AFTER deletion (update list) ------ //
@@ -71,16 +76,10 @@ const QuizPage = () => {
     }
   }
 
-  // ------ Filter, search and pagination ------ //
-  const pageSize = 6
-  const queryConfig = useQueryConfig()
-  const setQueryParam = useUpdateQueryParam()
-  const currentPage = Number(queryConfig.page) || 1
-
-  const paginatedAttempts = attempts.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-
-  const handlePageChange = (page: number) => {
-    setQueryParam('page', String(page))
+  // ------ Pagination ------ //
+  const handlePageChange = (pageNumber: number) => {
+    setPage((prevState) => ({ ...prevState, currentPage: pageNumber }))
+    fetchData(Number(quizId), pageNumber);
   }
 
   return (
@@ -92,9 +91,8 @@ const QuizPage = () => {
         </Button>
       </div>
 
-      <div className='min-h-screen flex flex-col items-center bg-gray-50'>
-        {/* Introduction */}
-        <Card className='w-full shadow-lg rounded-xl p-8 bg-white pb-3'>
+      <div className='min-h-screen flex flex-col items-center'>
+        <Card className='w-full shadow-lg rounded-xl p-6 bg-white pb-8'>
           <CardContent>
             <div className='flex items-center gap-3 mb-4'>
               <h2 className='text-2xl font-bold text-gray-900'>Quiz: {quiz?.title}</h2>
@@ -126,7 +124,7 @@ const QuizPage = () => {
               </div>
             ) : (
               <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-                {paginatedAttempts.map((attempt) => (
+                {attempts.map((attempt) => (
                   <AttemptCard
                     quizId={attempt.quizId}
                     quizTitle={quiz?.title || ""}
@@ -143,16 +141,17 @@ const QuizPage = () => {
           </AnimatedSection>
 
           {/* Pagination */}
-          <AnimatedSection delay={0.2}>
-            {attempts.length > pageSize && (
+          {page.totalPages > 1 && (
+            <FadeInSection>
               <Pagination
-                total={attempts.length}
-                pageSize={pageSize}
-                currentPage={currentPage}
+                total={page.totalElements}
+                pageSize={page.pageSize}
+                totalPages={page.totalPages}
+                currentPage={page.currentPage}
                 onPageChange={handlePageChange}
               />
-            )}
-          </AnimatedSection>
+            </FadeInSection>
+          )}
           {/* End - Pagination */}
         </Card>
       </div>

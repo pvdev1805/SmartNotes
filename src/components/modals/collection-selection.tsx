@@ -12,7 +12,10 @@ interface AddToCollectionModalProps {
   objTitle: string // object's title
   orgCollectionId: number // object's origin collection's id
   collections: Collection[] // available choices
-  isAdding: boolean
+  pageNumber: number,
+  totalPages: number,
+  isAdding: boolean,
+  onPageChange: (pageNumber: number) => void,
   onCancel: () => void // should trigger hiding modal in parent component
   onConfirm: (collectionId: number) => void // should trigger next action in parent component
 }
@@ -22,7 +25,10 @@ const AddToCollectionModal = ({
                                 objTitle,
                                 orgCollectionId,
                                 collections,
+                                pageNumber,
+                                totalPages,
                                 isAdding,
+                                onPageChange,
                                 onCancel,
                                 onConfirm
                               }: AddToCollectionModalProps) => {
@@ -85,6 +91,24 @@ const AddToCollectionModal = ({
                   </label>
                 ))
               )}
+            </div>
+
+            <div className="flex justify-between mt-4">
+              <Button
+                variant="outline"
+                disabled={pageNumber === 1}
+                onClick={() => onPageChange(pageNumber - 1)}
+              >
+                Previous
+              </Button>
+
+              <Button
+                variant="outline"
+                disabled={pageNumber === totalPages}
+                onClick={() => onPageChange(pageNumber + 1)}
+              >
+                Next
+              </Button>
             </div>
           </div>
 

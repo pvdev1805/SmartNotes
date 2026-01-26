@@ -7,7 +7,7 @@ import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getAttemptAnswer } from '@/services/quiz.service'
 import { useNav } from '@/hooks/use-nav'
-import { AttemptQuestion, AttemptResult } from '@/types/quesiton.type'
+import { AttemptQuestion, AttemptResult } from '@/types/quiz-attempt.type'
 import { toAttemptQuestion } from '@/mapper/attempt-mapper'
 
 const QuizResultPage = () => {

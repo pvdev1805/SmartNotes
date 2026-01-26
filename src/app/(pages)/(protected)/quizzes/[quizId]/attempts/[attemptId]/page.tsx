@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { QuizAttempt } from '@/types/quiz-attempt'
+import { QuizAttempt } from '@/types/quiz-attempt.type'
 import { finishAttempt, getQuizAttempt, startQuizAttempt, updateAttemptProgress } from '@/services/quiz.service'
 import { useParams } from 'next/navigation'
 import { useNav } from '@/hooks/use-nav'
-import { AttemptQuestion } from '@/types/quesiton.type'
+import { AttemptQuestion } from '@/types/quiz-attempt.type'
 import { toAttemptQuestion } from '@/mapper/attempt-mapper'
 
 const QuizQuestionPage = () => {

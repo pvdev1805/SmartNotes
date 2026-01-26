@@ -1,45 +1,65 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Plus, Search, Filter, Notebook } from 'lucide-react'
+import { Plus, Search, Notebook, Eraser } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
-import useQueryConfig from '@/hooks/use-query-config'
-import useUpdateQueryParam from '@/hooks/use-update-query-param'
 import QuizCard from '@/components/quizzes/quiz-card'
 
 import { Quiz } from '@/types/quiz.type'
-import { getAllQuizSets } from '@/services/quiz-set.service'
+import { getRecentQuizSets } from '@/services/quiz-set.service'
 import { useNav } from '@/hooks/use-nav'
 import { getAllQuizzes } from '@/services/quiz.service'
 import { QuizSet } from '@/types/quiz-set.type'
 import QuizSetCard from '@/components/quizzes/quiz-set-card'
+import { PageInfo } from '@/types/util.type'
+import { useSearchParams } from 'next/navigation'
+import useQuery from '@/hooks/use-query'
+import AnimatedList from '@/components/animations/animated-list'
+import FilterPopover, { FilterCriterion } from '@/components/common/filter-popover'
+import SortPopover, { SortCriterion } from '@/components/common/sort-popover'
+import FadeInSection from '@/components/animations/fade-in-section'
+
+const filterCriteria : FilterCriterion[] = [
+  { key: 'createdFrom', label: 'Created From', inputType: 'date' },
+  { key: 'createdTo', label: 'Created Before', inputType: 'date' },
+  { key: 'updatedFrom', label: 'Updated From', inputType: 'date' },
+  { key: 'updatedTo', label: 'Updated Before', inputType: 'date' }
+]
+
+const sortCriteria : SortCriterion[] = [
+  { value: 'createdAt', label: 'Created At' },
+  { value: 'updatedAt', label: 'Updated At' },
+  { value: 'title', label: 'Title' }
+]
 
 const QuizzesListPage = () => {
   const nav = useNav()
 
   const [quizzes, setQuizzes] = useState<Quiz[]>([])
+  const [page, setPage] = useState<PageInfo>({ currentPage: 1, pageSize: 6, totalPages: 0, totalElements: 0 })
+
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   const [quizSets, setQuizSets] = useState<QuizSet[]>([])
   const [quizSetLoading, setQuizSetLoading] = useState(true)
 
-  // Search & filter
   const [search, setSearch] = useState('')
-  const [error, setError] = useState('')
-
-  const allowSearch = false;
-  const allowFilter = false;
+  const [resetTrigger, setResetTrigger] = useState(false)
+  const searchParams = useSearchParams()
+  const { setQuery, removeQuery, clearQuery } = useQuery()
 
   // ------ Fetching data (quizzes and quiz sets) ------ //
   // Fetch quizzes
-  const fetchData = async () => {
+  const fetchData = async (pageNum: number) => {
     setLoading(true)
     setError('')
 
     try {
-      const data = await getAllQuizzes()
-      setQuizzes(data)
+      const data = await getAllQuizzes(pageNum, page.pageSize, searchParams.toString())
+      setQuizzes(data.pageData)
+      setPage(data.pageInfo)
     } catch (error : any) {
       setQuizzes([])
       setError(error.message)
@@ -52,8 +72,8 @@ const QuizzesListPage = () => {
   const fetchCollections = async () => {
     setQuizSetLoading(true)
     try {
-      const data = await getAllQuizSets()
-      setQuizSets(data)
+      const data = await getRecentQuizSets()
+      setQuizSets(data.pageData)
     } catch (error: any) {
       console.error('Failed to load collections:', error)
     } finally {
@@ -62,10 +82,9 @@ const QuizzesListPage = () => {
   }
 
   useEffect(() => {
-    fetchData()
+    fetchData(page.currentPage)
     fetchCollections()
-  }, [])
-
+  }, [searchParams])
 
   // ------ Handle AFTER deletion (update list) ------ //
   const handleDeleted = (deletedId: number) => {
@@ -77,37 +96,52 @@ const QuizzesListPage = () => {
     fetchCollections()
   }
 
+  // ------ Handle AFTER renamed (update list) ------ //
+  const handleCollectionChanged = () => {
+    fetchData(page.currentPage)
+  }
+
   // ------ Handle AFTER deletion (update list) ------ //
   const handleQuizSetDeleted = (deletedId: number) => {
     // Delete a quiz set may result in deleting all quizzes in it
-    fetchData()
+    fetchData(page.currentPage)
     fetchCollections()
   }
 
   // ------ Filter, search and pagination ------ //
-  const filteredData = quizzes.filter(
-    (quizSet) =>
-      quizSet.title.toLowerCase().includes(search.toLowerCase())
-  )
-
-  const pageSize = 6
-  const queryConfig = useQueryConfig()
-  const setQueryParam = useUpdateQueryParam()
-  const currentPage = Number(queryConfig.page) || 1
-
-  const paginatedData = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  const handlePageChange = (pageNumber: number) => {
+    setPage((prevState) => ({ ...prevState, currentPage: pageNumber }))
+    setQuery('page', pageNumber)
+  }
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let keyword = e.target.value
-    if (keyword.trim() === '') {
-      setSearch('')
-    } else {
+    if (keyword.trim() != '') {
       setSearch(keyword)
+      setQuery('keyword', keyword)
+    } else {
+      setSearch('')
+      removeQuery('keyword')
     }
   }
 
-  const handlePageChange = (page: number) => {
-    setQueryParam('page', String(page))
+  const handleFilterInputChange = (filters: Record<string, string>) => {
+    Object.entries(filters).forEach(([key, value]) => {
+      setQuery(key, value)
+    })
+  }
+
+  const handleSortInputChange = (sortBy : string, sortOrder : string) => {
+    if (sortBy !== '' && sortOrder !== '') {
+      setQuery('sortBy', sortBy)
+      setQuery('sortOrder', sortOrder)
+    }
+  }
+
+  const handleClearQuery = () => {
+    setSearch('')
+    setResetTrigger(!resetTrigger)
+    clearQuery()
   }
 
   return (
@@ -140,19 +174,31 @@ const QuizzesListPage = () => {
             <Search className='absolute left-3 top-3 text-gray-400 w-5 h-5' />
             <input
               type='text'
-              placeholder='Search quizzes...'
+              placeholder='Search quiz...'
               value={search}
               onChange={handleSearchInputChange}
-              className={`w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 
-              ${!allowSearch ? 'opacity-80 bg-gray-50' : 'bg-white shadow-sm'}
-              `}
-              disabled={!allowSearch}
+              className='w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white shadow-sm'
             />
           </div>
-          <Button variant='outline' className='flex items-center gap-2' disabled={!allowFilter}>
-            <Filter className='w-5 h-5' />
-            Filter
-          </Button>
+          <div className="flex items-center gap-2">
+            <FilterPopover
+              criteria={filterCriteria}
+              resetTrigger={resetTrigger}
+              onApply={handleFilterInputChange}
+            />
+            <SortPopover
+              criteria={sortCriteria}
+              resetTrigger={resetTrigger}
+              onApply={handleSortInputChange}
+            />
+            <Button
+              variant='outline'
+              onClick={handleClearQuery}
+              className='flex items-center gap-2 border-red-300 text-red-600 bg-red-50 hover:bg-red-100'>
+              <Eraser  className="w-5 h-5" />
+              Reset
+            </Button>
+          </div>
         </div>
       </AnimatedSection>
 
@@ -171,65 +217,55 @@ const QuizzesListPage = () => {
       )}
 
       {/* Collection Grid */}
-      {/* ADD: Collections Section */}
-      <AnimatedSection delay={0.2}>
-        <div className='mb-6'>
-          <div className='flex items-center justify-between mb-3'>
-            <h2 className='text-xl font-semibold text-gray-900'>Collections / Quiz Sets</h2>
-            <Button
-              variant='ghost'
-              size='sm'
-              className='text-blue-600 hover:text-blue-700'
-              onClick={nav.toQuizCollectionList}
-            >
-              View All
-            </Button>
-          </div>
-
-          {quizSetLoading ? (
-            <div className='gap-3  pb-2'>
-              {[1, 2, 3].map((i) => (
-                <div key={i}>
-                  <div className='h-20 w-40 bg-gray-200 rounded-lg'></div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div>
-              <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3'>
-                {quizSets.map((quizSet) => (
-                  <QuizSetCard
-                    key={quizSet.id}
-                    id={quizSet.id}
-                    originType={quizSet.originType}
-                    title={quizSet.title}
-                    onFinishRename={handleQuizSetRenamed}
-                    onFinishDelete={() => handleQuizSetDeleted(quizSet.id)}
-                  />
-                ))}
-
-                {/* Add New Collection Button */}
-                {/*<div*/}
-                {/*  onClick={nav.toQuizCollectionList}*/}
-                {/*  className='flex-shrink-0 min-w-[160px] p-4 rounded-lg border-2 border-dashed border-gray-300*/}
-                {/*  bg-gray-50 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition-all duration-200*/}
-                {/*  flex items-center justify-center'*/}
-                {/*>*/}
-                {/*  <Plus className='text-gray-400'></Plus>*/}
-                {/*</div>*/}
-              </div>
-            </div>
-          )}
+      <AnimatedSection delay={0.2} className='mb-6'>
+        <div className='flex items-center justify-between mb-3'>
+          <h2 className='text-xl font-semibold text-gray-900'>Recent Quiz Sets</h2>
+          <Button
+            variant='ghost'
+            size='sm'
+            className='text-blue-600 hover:text-blue-700'
+            onClick={nav.toQuizCollectionList}
+          >
+            View All
+          </Button>
         </div>
+
+        {quizSetLoading ? (
+          <div className='gap-3  pb-2'>
+            {[1, 2, 3].map((i) => (
+              <div key={i}>
+                <div className='h-20 w-40 bg-gray-200 rounded-lg'></div>
+              </div>
+            ))}
+          </div>
+        ) : !error && quizSets.length === 0 ? (
+          <div className='text-center text-gray-500 py-16'>
+            <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
+            <p className='text-lg'>No collection found.</p>
+          </div>
+        ) : (
+          <AnimatedList className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3'>
+            {quizSets.map((quizSet) => (
+              <QuizSetCard
+                key={quizSet.id}
+                id={quizSet.id}
+                originType={quizSet.originType}
+                title={quizSet.title}
+                onFinishRename={handleQuizSetRenamed}
+                onFinishDelete={() => handleQuizSetDeleted(quizSet.id)}
+              />
+            ))}
+          </AnimatedList>
+        )}
       </AnimatedSection>
-      {/* END: Collections Section */}
+      {/* END: Collections Grid */}
 
       {/* Quizzes Grid */}
       <h2 className='text-xl font-semibold text-foreground mb-3'>Recent Quizzes</h2>
       <AnimatedSection delay={0.2}>
         {loading ? (
           <p className='text-gray-500'>Loading quizzes...</p>
-        ) : !error && filteredData.length === 0 ? (
+        ) : !error && quizzes.length === 0 ? (
           <div className='text-center text-gray-500 py-16'>
             <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
             <p className='text-lg'>No quiz found. Try a different search or generate new quiz!</p>
@@ -237,7 +273,7 @@ const QuizzesListPage = () => {
         ) : (
           <section className='mb-4 space-y-4'>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-              {paginatedData.map((quiz) => (
+              {quizzes.map((quiz) => (
                 <QuizCard
                   key={quiz.id}
                   id={quiz.id}
@@ -245,7 +281,8 @@ const QuizzesListPage = () => {
                   quizSetId={quiz.quizSetId}
                   totalQuestions={quiz.questions?.length}
                   createdAt={new Date(quiz.createdAt)}
-                  onFinishCollectionChange={() => {}}
+                  updatedAt={new Date(quiz.updatedAt)}
+                  onFinishCollectionChange={handleCollectionChanged}
                   onFinishDelete={() => handleDeleted(quiz.id)}
                 />
               ))}
@@ -253,18 +290,20 @@ const QuizzesListPage = () => {
           </section>
         )}
       </AnimatedSection>
+      {/* End - Quizzes Grid */}
 
       {/* Pagination */}
-      <AnimatedSection delay={0.2}>
-        {filteredData.length > pageSize && (
+      {page.totalPages > 1 && (
+        <FadeInSection>
           <Pagination
-            total={filteredData.length}
-            pageSize={pageSize}
-            currentPage={currentPage}
+            total={page.totalElements}
+            pageSize={page.pageSize}
+            totalPages={page.totalPages}
+            currentPage={page.currentPage}
             onPageChange={handlePageChange}
           />
-        )}
-      </AnimatedSection>
+        </FadeInSection>
+      )}
       {/* End - Pagination */}
     </div>
   )

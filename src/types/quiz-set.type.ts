@@ -1,4 +1,5 @@
 import { Quiz } from '@/types/quiz.type'
+import { PageInfo } from '@/types/util.type'
 
 export interface QuizSet {
   id: number
@@ -7,6 +8,11 @@ export interface QuizSet {
   quizzes?: Quiz[]
   createdAt: string
   updatedAt?: string
+}
+
+export interface QuizSetPage {
+  pageData: QuizSet[]
+  pageInfo: PageInfo
 }
 
 // For frontend display

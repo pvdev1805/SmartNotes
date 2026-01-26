@@ -143,6 +143,7 @@ const Home = () => {
                     title={note.title}
                     description={note.description}
                     createdAt={note.createdAt}
+                    updatedAt={note.createdAt}
                     tags={note.tags}
                   />
                 </FadeInItem>

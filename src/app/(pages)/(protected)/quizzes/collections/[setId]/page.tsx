@@ -6,27 +6,50 @@ import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
 import useQueryConfig from '@/hooks/use-query-config'
 import useUpdateQueryParam from '@/hooks/use-update-query-param'
-import NoteCard from '@/components/notes/note-card'
 
-import { getAllQuizSets, getQuizSet } from '@/services/quiz-set.service'
+import { getQuizSet } from '@/services/quiz-set.service'
 import { QuizSet } from '@/types/quiz-set.type'
 import { useNav } from '@/hooks/use-nav'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { Quiz } from '@/types/quiz.type'
 import QuizCard from '@/components/quizzes/quiz-card'
+import { FilterCriterion } from '@/components/common/filter-popover'
+import { SortCriterion } from '@/components/common/sort-popover'
+import useQuery from '@/hooks/use-query'
+import { PageInfo } from '@/types/util.type'
+import FadeInSection from '@/components/animations/fade-in-section'
+
+const filterCriteria : FilterCriterion[] = [
+  { key: 'createdFrom', label: 'Created From', inputType: 'date' },
+  { key: 'createdTo', label: 'Created Before', inputType: 'date' },
+  { key: 'updatedFrom', label: 'Updated From', inputType: 'date' },
+  { key: 'updatedTo', label: 'Updated Before', inputType: 'date' }
+]
+
+const sortCriteria : SortCriterion[] = [
+  { value: 'createdAt', label: 'Created At' },
+  { value: 'updatedAt', label: 'Updated At' },
+  { value: 'title', label: 'Title' }
+]
 
 const QuizSetPage = () => {
   const nav = useNav()
   const { setId } = useParams()
 
-  const [search, setSearch] = useState('')
   const [quizSet, setQuizSet] = useState<QuizSet | null>(null)
   const [quizzes, setQuizzes] = useState<Quiz[]>([])
+  const [page, setPage] = useState<PageInfo>({ currentPage: 1, pageSize: 6, totalPages: 0, totalElements: 0 })
+
+const allowSearch = true;
+  const allowFilter = true;
+
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
-  const allowSearch = false;
-  const allowFilter = false;
+  const [search, setSearch] = useState('')
+  const [resetTrigger, setResetTrigger] = useState(false)
+  const searchParams = useSearchParams()
+  const { setQuery, removeQuery, clearQuery } = useQuery()
 
   const fetchData = async (id: number) => {
     setLoading(true)
@@ -34,7 +57,6 @@ const QuizSetPage = () => {
 
     try {
       const data = await getQuizSet(id)
-      console.log(data)
       setQuizSet(data)
       if (data.quizzes) {
         setQuizzes(data.quizzes)
@@ -165,7 +187,7 @@ const QuizSetPage = () => {
           </div>
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {paginatedData.map((quiz) => (
+            {quizzes.map((quiz) => (
               <QuizCard
                 key={quiz.id}
                 id={quiz.id}
@@ -173,8 +195,9 @@ const QuizSetPage = () => {
                 quizSetId={quiz.quizSetId}
                 totalQuestions={quiz.questions?.length}
                 createdAt={new Date(quiz.createdAt)}
-                onFinishCollectionChange={() => removeQuizFromList(quiz.id)}
-                onFinishDelete={() => removeQuizFromList(quiz.id)}
+                updatedAt={new Date(quiz.updatedAt)}
+                onFinishCollectionChange={() => {return;}}
+                onFinishDelete={() => {return;}}
               />
             ))}
           </div>
@@ -182,16 +205,17 @@ const QuizSetPage = () => {
       </AnimatedSection>
 
       {/* Pagination */}
-      <AnimatedSection delay={0.2}>
-        {filteredData.length > pageSize && (
+      {page.totalPages > 1 && (
+        <FadeInSection>
           <Pagination
-            total={filteredData.length}
-            pageSize={pageSize}
-            currentPage={currentPage}
+            total={page.totalElements}
+            pageSize={page.pageSize}
+            totalPages={page.totalPages}
+            currentPage={page.currentPage}
             onPageChange={handlePageChange}
           />
-        )}
-      </AnimatedSection>
+        </FadeInSection>
+      )}
       {/* End - Pagination */}
     </div>
   )

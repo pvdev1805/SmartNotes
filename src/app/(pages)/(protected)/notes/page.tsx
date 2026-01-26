@@ -204,14 +204,17 @@ const NotesListPage = () => {
       </FadeInSection>
 
       {/* Pagination */}
-      <FadeInSection>
-        <Pagination
-          total={page.totalElements}
-          pageSize={page.pageSize}
-          currentPage={page.currentPage}
-          onPageChange={handlePageChange}
-        />
-      </FadeInSection>
+      {page.totalPages > 1 && (
+        <FadeInSection>
+          <Pagination
+            total={page.totalElements}
+            pageSize={page.pageSize}
+            totalPages={page.totalPages}
+            currentPage={page.currentPage}
+            onPageChange={handlePageChange}
+          />
+        </FadeInSection>
+      )}
       {/* End - Pagination */}
     </div>
   )

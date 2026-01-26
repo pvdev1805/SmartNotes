@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Plus, Search, Filter, Notebook, CircleChevronLeft } from 'lucide-react'
+import { Plus, Search, Filter, Notebook, CircleChevronLeft, Eraser } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AnimatedSection from '@/components/landing/animated-section'
 import Pagination from '@/components/pagination'
@@ -12,31 +12,56 @@ import { QuizSet } from '@/types/quiz-set.type'
 import { useNav } from '@/hooks/use-nav'
 import QuizSetCard from '@/components/quizzes/quiz-set-card'
 import QuizSetInfoModal from '@/components/quizzes/quiz-set-info-modal'
+import { PageInfo } from '@/types/util.type'
+import { useSearchParams } from 'next/navigation'
+import useQuery from '@/hooks/use-query'
+import FadeInSection from '@/components/animations/fade-in-section'
+import FilterPopover, { FilterCriterion } from '@/components/common/filter-popover'
+import SortPopover, { SortCriterion } from '@/components/common/sort-popover'
+
+const filterCriteria : FilterCriterion[] = [
+  { key: 'createdFrom', label: 'Created From', inputType: 'date' },
+  { key: 'createdTo', label: 'Created Before', inputType: 'date' },
+  { key: 'updatedFrom', label: 'Updated From', inputType: 'date' },
+  { key: 'updatedTo', label: 'Updated Before', inputType: 'date' }
+]
+
+const sortCriteria : SortCriterion[] = [
+  { value: 'createdAt', label: 'Created At' },
+  { value: 'updatedAt', label: 'Updated At' },
+  { value: 'title', label: 'Title' }
+]
 
 const QuizSetsListPage = () => {
   const nav = useNav()
 
   const [quizSets, setQuizSets] = useState<QuizSet[]>([])
+  const [page, setPage] = useState<PageInfo>({ currentPage: 1, pageSize: 12, totalPages: 0, totalElements: 0 })
+
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   const [creationModalOpen, setCreationModalOpen] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
 
   // Search & filter
   const [search, setSearch] = useState('')
-  const [error, setError] = useState('')
+  const [resetTrigger, setResetTrigger] = useState(false)
+  const searchParams = useSearchParams()
+  const { setQuery, removeQuery, clearQuery } = useQuery()
 
-  const allowSearch = false;
-  const allowFilter = false;
+  const allowSearch = true;
+  const allowFilter = true;
 
   // ------ Fetching data ------ //
-  const fetchData = async () => {
+  const fetchData = async (pageNum: number) => {
     setLoading(true)
     setError('')
 
     try {
-      const data = await getAllQuizSets()
-      setQuizSets(data)
+      const data = await getAllQuizSets(pageNum, page.pageSize, searchParams.toString())
+      setQuizSets(data.pageData)
+      setPage(data.pageInfo)
     } catch (error : any) {
       setQuizSets([])
       setError(error.message)
@@ -46,19 +71,17 @@ const QuizSetsListPage = () => {
   }
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    fetchData(page.currentPage)
+  }, [searchParams])
 
   // ------ Handle AFTER deletion (update list) ------ //
   const handleDeleted = (deletedId: number) => {
-    setQuizSets((prevQuizSets) =>
-      prevQuizSets.filter((quizSet) => quizSet.id !== deletedId)
-    )
+    setQuizSets((prevQuizSets) => prevQuizSets.filter((quizSet) => quizSet.id !== deletedId))
   }
 
   // ------ Handle AFTER rename (update list) ------ //
   const handleRenamed = () => {
-    fetchData()
+    fetchData(page.currentPage)
   }
 
   // ------ Handle create new quiz set ------ //
@@ -67,7 +90,7 @@ const QuizSetsListPage = () => {
     try {
       const createdSet = await createQuizSet({ title })
       setCreationModalOpen(false)
-      await fetchData()
+      await fetchData(page.currentPage)
     } catch (error) {
       console.error('Failed to create quiz set:', error)
     } finally {
@@ -76,30 +99,65 @@ const QuizSetsListPage = () => {
   }
 
   // ------ Filter, search and pagination ------ //
-  const filteredData = quizSets.filter(
-    (quizSet) =>
-      quizSet.title.toLowerCase().includes(search.toLowerCase())
-  )
-
-  const pageSize = 12
-  const queryConfig = useQueryConfig()
-  const setQueryParam = useUpdateQueryParam()
-  const currentPage = Number(queryConfig.page) || 1
-
-  const paginatedData = filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+  // ------ Filter, search and pagination ------ //
+  const handlePageChange = (pageNumber: number) => {
+    setPage((prevState) => ({ ...prevState, currentPage: pageNumber }))
+    setQuery('page', pageNumber)
+  }
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let keyword = e.target.value
-    if (keyword.trim() === '') {
-      setSearch('')
-    } else {
+    if (keyword.trim() != '') {
       setSearch(keyword)
+      setQuery('keyword', keyword)
+    } else {
+      setSearch('')
+      removeQuery('keyword')
     }
   }
 
-  const handlePageChange = (page: number) => {
-    setQueryParam('page', String(page))
+  const handleFilterInputChange = (filters: Record<string, string>) => {
+    Object.entries(filters).forEach(([key, value]) => {
+      setQuery(key, value)
+    })
   }
+
+  const handleSortInputChange = (sortBy : string, sortOrder : string) => {
+    if (sortBy !== '' && sortOrder !== '') {
+      setQuery('sortBy', sortBy)
+      setQuery('sortOrder', sortOrder)
+    }
+  }
+
+  const handleClearQuery = () => {
+    setSearch('')
+    setResetTrigger(!resetTrigger)
+    clearQuery()
+  }
+
+  // const quizSets = quizSets.filter(
+  //   (quizSet) => quizSet.title.toLowerCase().includes(search.toLowerCase())
+  // )
+
+  // const pageSize = 12
+  // const queryConfig = useQueryConfig()
+  // const setQueryParam = useUpdateQueryParam()
+  // const currentPage = Number(queryConfig.page) || 1
+  //
+  // const quizSets = quizSets.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+
+  // const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   let keyword = e.target.value
+  //   if (keyword.trim() === '') {
+  //     setSearch('')
+  //   } else {
+  //     setSearch(keyword)
+  //   }
+  // }
+  //
+  // const handlePageChange = (page: number) => {
+  //   setQueryParam('page', String(page))
+  // }
 
   return (
     <div className='min-h-screen bg-gray-50 px-4 py-4 overflow-hidden'>
@@ -133,19 +191,31 @@ const QuizSetsListPage = () => {
             <Search className='absolute left-3 top-3 text-gray-400 w-5 h-5' />
             <input
               type='text'
-              placeholder='Search notes...'
+              placeholder='Search quiz...'
               value={search}
               onChange={handleSearchInputChange}
-              className={`w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 
-              ${!allowSearch ? 'opacity-80 bg-gray-50' : 'bg-white shadow-sm'}
-              `}
-              disabled={!allowSearch}
+              className='w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white shadow-sm'
             />
           </div>
-          <Button variant='outline' className='flex items-center gap-2' disabled={!allowFilter}>
-            <Filter className='w-5 h-5' />
-            Filter
-          </Button>
+          <div className="flex items-center gap-2">
+            <FilterPopover
+              criteria={filterCriteria}
+              resetTrigger={resetTrigger}
+              onApply={handleFilterInputChange}
+            />
+            <SortPopover
+              criteria={sortCriteria}
+              resetTrigger={resetTrigger}
+              onApply={handleSortInputChange}
+            />
+            <Button
+              variant='outline'
+              onClick={handleClearQuery}
+              className='flex items-center gap-2 border-red-300 text-red-600 bg-red-50 hover:bg-red-100'>
+              <Eraser  className="w-5 h-5" />
+              Reset
+            </Button>
+          </div>
         </div>
       </AnimatedSection>
 
@@ -167,14 +237,14 @@ const QuizSetsListPage = () => {
       <AnimatedSection delay={0.2}>
         {loading ? (
           <p className='text-gray-500'>Loading data...</p>
-        ) : !error && filteredData.length === 0 ? (
+        ) : !error && quizSets.length === 0 ? (
           <div className='text-center text-gray-500 py-16'>
             <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
             <p className='text-lg'>No collection found. Try a different search or add a collection!</p>
           </div>
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {paginatedData.map((quizSet) => (
+            {quizSets.map((quizSet) => (
               <QuizSetCard
                 key={quizSet.id}
                 id={quizSet.id}
@@ -189,16 +259,17 @@ const QuizSetsListPage = () => {
       </AnimatedSection>
 
       {/* Pagination */}
-      <AnimatedSection delay={0.2}>
-        {filteredData.length > pageSize && (
+      {page.totalPages > 1 && (
+        <FadeInSection>
           <Pagination
-            total={filteredData.length}
-            pageSize={pageSize}
-            currentPage={currentPage}
+            total={page.totalElements}
+            pageSize={page.pageSize}
+            totalPages={page.totalPages}
+            currentPage={page.currentPage}
             onPageChange={handlePageChange}
           />
-        )}
-      </AnimatedSection>
+        </FadeInSection>
+      )}
       {/* End - Pagination */}
 
       {/* Create Quiz Set Modal */}

@@ -9,11 +9,16 @@ import { generateSingleQuiz } from '@/services/quiz.service'
 import AnimatedSection from '@/components/landing/animated-section'
 import { getAllNotes } from '@/services/note.service'
 import { useNav } from '@/hooks/use-nav'
+import FadeInSection from '@/components/animations/fade-in-section'
+import Pagination from '@/components/pagination'
+import { PageInfo } from '@/types/util.type'
 
 const NoteSelectionPage = () => {
   const nav = useNav()
 
   const [notes, setNotes] = useState<Note[]>([])
+  const [page, setPage] = useState<PageInfo>({ currentPage: 1, pageSize: 3, totalPages: 0, totalElements: 0 })
+
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
@@ -25,13 +30,14 @@ const NoteSelectionPage = () => {
   const [selectedNotes, setSelectedNotes] = useState<number[]>([])
   // const [pdfFile, setPdfFile] = useState<File | null>(null)
 
-  const fetchData = async () => {
+  const fetchData = async (pageNum: number) => {
     setLoading(true)
     setError('')
 
     try {
-      const data = await getAllNotes()
-      setNotes(data)
+      const data = await getAllNotes(pageNum, page.pageSize)
+      setNotes(data.pageData)
+      setPage(data.pageInfo)
     } catch (error : any) {
       setNotes([])
       setError(error.message)
@@ -42,7 +48,7 @@ const NoteSelectionPage = () => {
   }
 
   useEffect(() => {
-    fetchData()
+    fetchData(page.currentPage)
   }, [])
 
   const handleMultipleToggle = () => {
@@ -63,14 +69,9 @@ const NoteSelectionPage = () => {
   //   if (e.target.files?.[0]) setPdfFile(e.target.files[0])
   // }
 
-  // const canGenerate = selectedNotes.length > 0 || pdfFile
-
   const canGenerate = selectedNotes.length > 0 || selectedNoteId
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    // TODO: Trigger quiz generation
+  const handleSubmit = async () => {
     setGenerating(true)
     setError('')
 
@@ -83,6 +84,11 @@ const NoteSelectionPage = () => {
     } finally {
       setGenerating(false)
     }
+  }
+
+  const handlePageChange = (pageNumber: number) => {
+    setPage((prevState) => ({ ...prevState, currentPage: pageNumber }))
+    fetchData(pageNumber)
   }
 
   return (
@@ -117,60 +123,88 @@ const NoteSelectionPage = () => {
 
             <p className='text-gray-700 mb-6'>Select notes to generate a quiz using AI.</p>
             {/*<p className='text-gray-700 mb-6'>Select notes or upload a PDF to generate a quiz using AI.</p>*/}
-            <form className='flex flex-col gap-8' onSubmit={handleSubmit}>
-
-              {/* Notes Selection */}
+            <div className='flex flex-col gap-8'>
+            {/* Notes Selection */}
               <h3 className='font-semibold text-gray-800 mb-2 flex items-center gap-2'>
                 <FileText className='w-5 h-5 text-gray-500' /> Select Notes
               </h3>
               {isMultiple ? (
+                /* Multiple Notes Selection */
                 <div>
                   {notes.length === 0 ? (
                     <div className='bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-lg px-4 py-3 text-sm'>
                       No notes available. Please create a note first.
                     </div>
                   ) : (
-                    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'>
-                      {notes.map((note) => (
-                        <label
-                          key={note.id}
-                          className='flex items-center gap-2 bg-gray-50 border rounded-lg px-3 py-2 cursor-pointer hover:border-blue-400 transition'
-                        >
-                          <input
-                            type='checkbox'
-                            checked={selectedNotes.includes(note.id)}
-                            onChange={() => handleNoteToggle(note.id)}
-                            className='accent-blue-600'
+                    <div>
+                      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'>
+                        {notes.map((note) => (
+                          <label
+                            key={note.id}
+                            className='flex items-center gap-2 bg-gray-50 border rounded-lg px-3 py-2 cursor-pointer hover:border-blue-400 transition'
+                          >
+                            <input
+                              type='checkbox'
+                              checked={selectedNotes.includes(note.id)}
+                              onChange={() => handleNoteToggle(note.id)}
+                              className='accent-blue-600'
+                            />
+                            <span className='text-gray-800 font-medium'>{note.title}</span>
+                          </label>
+                        ))}
+                      </div>
+
+                      {page.totalPages > 1 && (
+                        <FadeInSection>
+                          <Pagination
+                            total={page.totalElements}
+                            pageSize={page.pageSize}
+                            totalPages={page.totalPages}
+                            currentPage={page.currentPage}
+                            onPageChange={handlePageChange}
                           />
-                          <span className='text-gray-800 font-medium'>{note.title}</span>
-                        </label>
-                      ))}
+                        </FadeInSection>
+                      )}
                     </div>
                   )}
                 </div>
               ) : (
+                /* Single Note Selection */
                 <div>
                   {notes.length === 0 ? (
                     <div className='bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-lg px-4 py-3 text-sm'>
                       No notes available. Please create a note first.
                     </div>
                   ) : (
-                    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'>
-                      {notes.map((note) => (
-                        <label
-                          key={note.id}
-                          className='flex items-center gap-2 bg-gray-50 border rounded-lg px-3 py-2 cursor-pointer hover:border-blue-400 transition'
-                        >
-                          <input
-                            type='radio'
-                            name='noteSelection'
-                            checked={selectedNoteId === note.id}
-                            onChange={() => handleNoteToggle(note.id)}
-                            className='accent-blue-600'
+                    <div>
+                      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3'>
+                        {notes.map((note) => (
+                          <label
+                            key={note.id}
+                            className='flex items-center gap-2 bg-gray-50 border rounded-lg px-3 py-2 cursor-pointer hover:border-blue-400 transition'
+                          >
+                            <input
+                              type='radio'
+                              name='noteSelection'
+                              checked={selectedNoteId === note.id}
+                              onChange={() => handleNoteToggle(note.id)}
+                              className='accent-blue-600'
+                            />
+                            <span className='text-gray-800 font-medium'>{note.title}</span>
+                          </label>
+                        ))}
+                      </div>
+                      {page.totalPages > 1 && (
+                        <FadeInSection>
+                          <Pagination
+                            total={page.totalElements}
+                            pageSize={page.pageSize}
+                            totalPages={page.totalPages}
+                            currentPage={page.currentPage}
+                            onPageChange={handlePageChange}
                           />
-                          <span className='text-gray-800 font-medium'>{note.title}</span>
-                        </label>
-                      ))}
+                        </FadeInSection>
+                      )}
                     </div>
                   )}
                 </div>
@@ -197,11 +231,11 @@ const NoteSelectionPage = () => {
 
               {/* Generate Button */}
               <div className='flex justify-end mt-4'>
-                <Button type='submit' disabled={!canGenerate || generating}>
+                <Button type="button" onClick={() => handleSubmit()} disabled={!canGenerate || generating}>
                   Generate Quiz
                 </Button>
               </div>
-            </form>
+            </div>
 
             <div className='pt-5'>
               {/* Generating Message */}

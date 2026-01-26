@@ -1,7 +1,7 @@
 import apiClient from '@/apis/api-client'
 import { ApiResponse } from '@/types/auth.type'
-import { Quiz } from '@/types/quiz.type'
-import { QuizAttempt } from '@/types/quiz-attempt'
+import { Quiz, QuizPage } from '@/types/quiz.type'
+import { QuizAttempt, QuizAttemptPage } from '@/types/quiz-attempt.type'
 import { Note } from '@/types/note.type'
 
 const QUIZ_BASE_API = '/quizzes'
@@ -22,9 +22,11 @@ export const generateSingleQuiz = async (docId : number): Promise<Quiz> => {
   return apiRes.data
 }
 
-export const getAllQuizzes = async (): Promise<Quiz[]> => {
-  const response = await apiClient.get(QUIZ_BASE_API)
-  const apiRes: ApiResponse<Quiz[]> = response.data
+export const getAllQuizzes = async (page: number, size: number, query?: string): Promise<QuizPage> => {
+  const response = await apiClient.get(
+    `${QUIZ_BASE_API}?page=${page}&size=${size}&${query}`
+  )
+  const apiRes: ApiResponse<QuizPage> = response.data
 
   if (!apiRes.data && apiRes.code != 1000) {
     throw new Error(`Failed to get data: ${apiRes.message}`)
@@ -64,9 +66,10 @@ export const deleteQuiz = async (quizId : number) => {
 }
 
 // ------ Quiz Attempts ------ //
-export const getAllQuizAttempts = async (quizId : number): Promise<QuizAttempt[]> => {
-  const response = await apiClient.get(`${QUIZ_BASE_API}/${quizId}/attempts`)
-  const apiRes: ApiResponse<QuizAttempt[]> = response.data
+export const getAllQuizAttempts = async (quizId : number, page: number, size: number): Promise<QuizAttemptPage> => {
+  const response = await apiClient.get(
+    `${QUIZ_BASE_API}/${quizId}/attempts?page=${page}&size=${size}`)
+  const apiRes: ApiResponse<QuizAttemptPage> = response.data
 
   if (!apiRes.data && apiRes.code != 1000) {
     throw new Error(`Failed to get data: ${apiRes.message}`)
