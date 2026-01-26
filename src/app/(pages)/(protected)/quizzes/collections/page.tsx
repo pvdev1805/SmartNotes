@@ -99,7 +99,6 @@ const QuizSetsListPage = () => {
   }
 
   // ------ Filter, search and pagination ------ //
-  // ------ Filter, search and pagination ------ //
   const handlePageChange = (pageNumber: number) => {
     setPage((prevState) => ({ ...prevState, currentPage: pageNumber }))
     setQuery('page', pageNumber)
@@ -135,30 +134,6 @@ const QuizSetsListPage = () => {
     clearQuery()
   }
 
-  // const quizSets = quizSets.filter(
-  //   (quizSet) => quizSet.title.toLowerCase().includes(search.toLowerCase())
-  // )
-
-  // const pageSize = 12
-  // const queryConfig = useQueryConfig()
-  // const setQueryParam = useUpdateQueryParam()
-  // const currentPage = Number(queryConfig.page) || 1
-  //
-  // const quizSets = quizSets.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-
-  // const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   let keyword = e.target.value
-  //   if (keyword.trim() === '') {
-  //     setSearch('')
-  //   } else {
-  //     setSearch(keyword)
-  //   }
-  // }
-  //
-  // const handlePageChange = (page: number) => {
-  //   setQueryParam('page', String(page))
-  // }
-
   return (
     <div className='min-h-screen bg-gray-50 px-4 py-4 overflow-hidden'>
       {/* Header */}
@@ -191,7 +166,7 @@ const QuizSetsListPage = () => {
             <Search className='absolute left-3 top-3 text-gray-400 w-5 h-5' />
             <input
               type='text'
-              placeholder='Search quiz...'
+              placeholder='Search title...'
               value={search}
               onChange={handleSearchInputChange}
               className='w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white shadow-sm'
