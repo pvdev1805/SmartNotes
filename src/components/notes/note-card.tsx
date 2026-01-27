@@ -8,7 +8,7 @@ import { MouseEvent, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 
 import { deleteNoteById } from '@/services/note.service'
-import { ROUTES, useNav } from '@/hooks/use-nav'
+import { ROUTES } from '@/hooks/use-nav'
 import DeleteConfirmationModal from '@/components/modals/delete-confirmation'
 
 interface NoteCardProps {

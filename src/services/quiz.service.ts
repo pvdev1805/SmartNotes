@@ -2,10 +2,8 @@ import apiClient from '@/apis/api-client'
 import { ApiResponse } from '@/types/auth.type'
 import { Quiz, QuizPage } from '@/types/quiz.type'
 import { QuizAttempt, QuizAttemptPage } from '@/types/quiz-attempt.type'
-import { Note } from '@/types/note.type'
 
 const QUIZ_BASE_API = '/quizzes'
-const QUIZ_ATTEMPT_BASE_API = '/quizzes'
 const QUIZ_GENERATION_BASE_API = '/ai/generation/quiz-sets'
 
 export const generateSingleQuiz = async (docId : number): Promise<Quiz> => {

@@ -38,8 +38,6 @@ const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, updatedAt, 
   const [collection, setCollection] = useState<QuizCollection[]>([])
   const [collectionPage, setCollectionPage] = useState<PageInfo>({ currentPage: 1, pageSize: 4, totalPages: 0, totalElements: 0 })
 
-  const MAX_TAGS_DISPLAY = 2
-
   // ------ Handle action bar on each card ------ //
   const handleClickOutside = (event: MouseEvent | globalThis.MouseEvent) => {
     if (

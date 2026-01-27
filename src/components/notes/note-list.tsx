@@ -30,9 +30,10 @@ const sortCriteria : SortCriterion[] = [
 
 interface NoteListProps {
   pageSize?: number
+  reloadTrigger?: boolean
 }
 
-const NoteList = ({ pageSize } : NoteListProps ) => {
+const NoteList = ({ pageSize, reloadTrigger } : NoteListProps ) => {
   const [notes, setNotes] = useState<Note[]>([])
   const [page, setPage] = useState<PageInfo>({
     currentPage: 1,
@@ -68,7 +69,7 @@ const NoteList = ({ pageSize } : NoteListProps ) => {
 
   useEffect(() => {
     fetchData(page.currentPage)
-  }, [searchParams])
+  }, [searchParams, reloadTrigger])
 
   // ------ Handle AFTER deletion (update list) ------ //
   const handleNoteDeleted = (deletedNoteId: number) => {
