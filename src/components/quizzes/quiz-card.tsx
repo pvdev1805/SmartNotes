@@ -9,7 +9,7 @@ import { ROUTES } from '@/hooks/use-nav'
 import { deleteQuiz, updateQuiz } from '@/services/quiz.service'
 import DeleteConfirmationModal from '@/components/modals/delete-confirmation'
 import CollectionSelection from '@/components/modals/collection-selection'
-import { getAllQuizSets, getRecentQuizSets } from '@/services/quiz-set.service'
+import { getAllQuizSets } from '@/services/quiz-set.service'
 import { QuizCollection } from '@/types/quiz-set.type'
 import { PageInfo } from '@/types/util.type'
 
@@ -169,7 +169,8 @@ const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, updatedAt, 
                 <h3 className='font-semibold text-foreground truncate max-w-[200px] sm:max-w-[220px]'>{title}</h3>
               </div>
 
-              <p className='mb-4 text-sm text-muted-foreground lg:min-h-10 line-clamp-2'>Total: {totalQuestions} questions</p>
+              {totalQuestions &&
+                <p className='mb-4 text-sm text-muted-foreground lg:min-h-10 line-clamp-2'>Total: {totalQuestions} questions</p>}
               <TimeAgo date={createdAt} className='mb-2' />
             </CardContent>
           </Link>
@@ -233,7 +234,7 @@ const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, updatedAt, 
             isDeleting={isDeleting}
             onCancel={() => setDeleteConfirmationOpen(false)}
             onConfirm={handleConfirmDelete}
-          ></DeleteConfirmationModal>
+          />
         }
         {/* End - Confirmation Modal */}
 
