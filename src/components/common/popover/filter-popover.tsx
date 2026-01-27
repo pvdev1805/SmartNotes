@@ -1,6 +1,6 @@
 import { Filter } from 'lucide-react'
-import GenericPopover from '@/components/common/generic-popover'
 import { useEffect, useState } from 'react'
+import GenericPopover from '@/components/common/popover/generic-popover'
 
 export interface FilterCriterion {
   key: string

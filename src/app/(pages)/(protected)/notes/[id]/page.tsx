@@ -12,6 +12,7 @@ import { getNoteById, updateNote } from '@/services/note.service'
 import AutoResizeTextarea from '@/components/notes/auto-resize-textarea'
 import ReactMarkdown from 'react-markdown'
 import { useNav } from '@/hooks/use-nav'
+import ErrorBlock from '@/components/common/error-block'
 
 const NoteDetailsPage = () => {
   const nav = useNav()
@@ -153,6 +154,8 @@ const NoteDetailsPage = () => {
                   )}
                 </div>
               </div>
+
+              <ErrorBlock errorMessage={error} />
 
               <div className='mb-2'>
                 {isEditing ? (

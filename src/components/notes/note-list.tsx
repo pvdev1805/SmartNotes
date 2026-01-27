@@ -1,10 +1,9 @@
 'use client'
 
-import FilterPopover, { FilterCriterion } from '@/components/common/filter-popover'
-import SortPopover, { SortCriterion } from '@/components/common/sort-popover'
+import { FilterCriterion } from '@/components/common/popover/filter-popover'
+import { SortCriterion } from '@/components/common/popover/sort-popover'
 import FadeInSection from '@/components/animations/fade-in-section'
-import { Eraser, Notebook, Search } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Notebook } from 'lucide-react'
 import AnimatedList from '@/components/animations/animated-list'
 import NoteCard from '@/components/notes/note-card'
 import Pagination from '@/components/pagination'
@@ -14,6 +13,8 @@ import { PageInfo } from '@/types/util.type'
 import { useSearchParams } from 'next/navigation'
 import useQuery from '@/hooks/use-query'
 import { getAllNotes } from '@/services/note.service'
+import SearchLayout from '@/components/common/search-layout'
+import ErrorBlock from '@/components/common/error-block'
 
 const filterCriteria : FilterCriterion[] = [
   { key: 'createdFrom', label: 'Created From', inputType: 'date' },
@@ -45,10 +46,8 @@ const NoteList = ({ pageSize, reloadTrigger } : NoteListProps ) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const [search, setSearch] = useState('')
-  const [resetTrigger, setResetTrigger] = useState(false)
   const searchParams = useSearchParams()
-  const { setQuery, removeQuery, clearQuery } = useQuery()
+  const { setQuery } = useQuery()
 
   // ------ Fetching data ------ //
   const fetchData = async (pageNum: number) => {
@@ -76,94 +75,19 @@ const NoteList = ({ pageSize, reloadTrigger } : NoteListProps ) => {
     fetchData(page.currentPage) // Fetch again to reload paginated elements
   }
 
-  // ------ Pagination, Search, Filter and Sort ------ //
+  // ------ Pagination ------ //
   const handlePageChange = (pageNumber: number) => {
     setPage((prevState) => ({ ...prevState, currentPage: pageNumber }))
     setQuery('page', pageNumber)
   }
 
-  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let keyword = e.target.value
-    if (keyword.trim() != '') {
-      setSearch(keyword)
-      setQuery('keyword', keyword)
-    } else {
-      setSearch('')
-      removeQuery('keyword')
-    }
-  }
-
-  const handleFilterInputChange = (filters: Record<string, string>) => {
-    Object.entries(filters).forEach(([key, value]) => {
-      setQuery(key, value)
-    })
-  }
-
-  const handleSortInputChange = (sortBy : string, sortOrder : string) => {
-    if (sortBy !== '' && sortOrder !== '') {
-      setQuery('sortBy', sortBy)
-      setQuery('sortOrder', sortOrder)
-    }
-  }
-
-  const handleClearQuery = () => {
-    setSearch('')
-    setResetTrigger(!resetTrigger)
-    clearQuery()
-  }
-
   return (
     <>
       {/* Search & Filter */}
-      <FadeInSection>
-        <div className='flex items-center gap-4 mb-6'>
-          <div className='relative'>
-            <Search className='absolute left-3 top-3 text-gray-400 w-5 h-5' />
-            <input
-              type='text'
-              placeholder='Search notes...'
-              value={search}
-              onChange={handleSearchInputChange}
-              className='w-full sm:w-64 md:w-80 lg:w-96 pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white shadow-sm'
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <FilterPopover
-              criteria={filterCriteria}
-              resetTrigger={resetTrigger}
-              onApply={handleFilterInputChange}
-            />
-            <SortPopover
-              criteria={sortCriteria}
-              resetTrigger={resetTrigger}
-              onApply={handleSortInputChange}
-            />
-            <Button
-              variant='outline'
-              onClick={handleClearQuery}
-              className='flex items-center gap-2 border-red-300 text-red-600 bg-red-50 hover:bg-red-100'>
-              <Eraser  className="w-5 h-5" />
-              Reset
-            </Button>
-          </div>
-        </div>
-      </FadeInSection>
-      {/* End - Search & Filter */}
+      <SearchLayout filterCriteria={filterCriteria} sortCriteria={sortCriteria} />
 
       {/* Error State */}
-      {error != '' && (
-        <FadeInSection>
-          <div className='bg-red-50 border border-red-200 rounded-lg p-6 mb-6'>
-            <div className='flex items-start gap-3'>
-              <div className='flex-1'>
-                <h3 className='text-red-900 font-semibold mb-1'>Error Loading Notes</h3>
-                <p className='text-red-700 mb-4'>{error}</p>
-              </div>
-            </div>
-          </div>
-        </FadeInSection>
-      )}
-      {/* End - Error State */}
+      <ErrorBlock errorMessage={error} />
 
       {/* Notes Grid */}
       <FadeInSection>

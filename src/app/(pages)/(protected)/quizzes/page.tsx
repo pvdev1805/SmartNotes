@@ -10,15 +10,15 @@ import { QuizSet } from '@/types/quiz-set.type'
 import QuizSetCard from '@/components/quizzes/quiz-set-card'
 import AnimatedList from '@/components/animations/animated-list'
 import QuizList from '@/components/quizzes/quiz-list'
+import ErrorBlock from '@/components/common/error-block'
 
 const QuizzesListPage = () => {
   const nav = useNav()
 
   const [quizSets, setQuizSets] = useState<QuizSet[]>([])
-  const [quizSetLoading, setQuizSetLoading] = useState(true)
   const [quizReload, setQuizReload] = useState(false)
-
-  const [error, setError] = useState('')
+  const [quizSetLoading, setQuizSetLoading] = useState(true)
+  const [quizSetError, setQuizSetError] = useState('')
 
   // ------ Fetching data (quiz sets) ------ //
   const fetchCollections = async () => {
@@ -72,21 +72,6 @@ const QuizzesListPage = () => {
       </AnimatedSection>
       {/* End - Header */}
 
-      {/* Error State */}
-      {error != '' && (
-        <AnimatedSection delay={0.2}>
-          <div className='bg-red-50 border border-red-200 rounded-lg p-6 mb-6'>
-            <div className='flex items-start gap-3'>
-              <div className='flex-1'>
-                <h3 className='text-red-900 font-semibold mb-1'>Error Loading Quizzes</h3>
-                <p className='text-red-700 mb-4'>{error}</p>
-              </div>
-            </div>
-          </div>
-        </AnimatedSection>
-      )}
-      {/* END: Error State */}
-
       {/* Collection Grid */}
       <AnimatedSection delay={0.2} className='mb-6'>
         <div className='flex items-center justify-between mb-3'>
@@ -101,6 +86,8 @@ const QuizzesListPage = () => {
           </Button>
         </div>
 
+        <ErrorBlock errorMessage={quizSetError} />
+
         {quizSetLoading ? (
           <div className='gap-3  pb-2'>
             {[1, 2, 3].map((i) => (
@@ -109,7 +96,7 @@ const QuizzesListPage = () => {
               </div>
             ))}
           </div>
-        ) : !error && quizSets.length === 0 ? (
+        ) : !quizSetError && quizSets.length === 0 ? (
           <div className='text-center text-gray-500 py-16'>
             <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
             <p className='text-lg'>No collection found.</p>

@@ -12,6 +12,7 @@ import { useNav } from '@/hooks/use-nav'
 import FadeInSection from '@/components/animations/fade-in-section'
 import Pagination from '@/components/pagination'
 import { PageInfo } from '@/types/util.type'
+import ErrorBlock from '@/components/common/error-block'
 
 const NoteSelectionPage = () => {
   const nav = useNav()
@@ -252,18 +253,8 @@ const NoteSelectionPage = () => {
               )}
 
               {/* Error Message */}
-              {error != '' && (
-                <AnimatedSection delay={0.2}>
-                  <div className='bg-red-50 border border-red-200 rounded-lg p-6 mb-6'>
-                    <div className='flex items-start gap-3'>
-                      <div className='flex-1'>
-                        <h3 className='text-red-900 font-semibold mb-1'>Error Loading Notes</h3>
-                        <p className='text-red-700 mb-4'>{error}</p>
-                      </div>
-                    </div>
-                  </div>
-                </AnimatedSection>
-              )}
+              <ErrorBlock errorMessage={error} />
+
             </div>
           </CardContent>
         </Card>

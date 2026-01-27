@@ -8,6 +8,7 @@ import { createNote } from '@/services/note.service'
 import AnimatedSection from '@/components/landing/animated-section'
 import AutoResizeTextarea from '@/components/notes/auto-resize-textarea'
 import { useNav } from '@/hooks/use-nav'
+import ErrorBlock from '@/components/common/error-block'
 
 const NewNotePage = () => {
   const nav = useNav()
@@ -81,22 +82,11 @@ const NewNotePage = () => {
             </div>
 
             {/* Error Message or Input Form */}
+            <div className='mb-4'>
+              <p className='text-sm text-gray-700'>Create a new note by filling out the details below.</p>
+            </div>
             {error != '' ? (
-              <>
-                <div className='mb-4'>
-                  <p className='text-sm text-gray-700'>Create a new note by filling out the details below.</p>
-                </div>
-                <AnimatedSection delay={0.2}>
-                  <div className='bg-red-50 border border-red-200 rounded-lg p-6 mb-6'>
-                    <div className='flex items-start gap-3'>
-                      <div className='flex-1'>
-                        <h3 className='text-red-900 font-semibold mb-1'>Error Creating Notes</h3>
-                        <p className='text-red-700 mb-4'>{error}</p>
-                      </div>
-                    </div>
-                  </div>
-                </AnimatedSection>
-              </>
+              <ErrorBlock errorMessage={error} />
             ) : (
               <form onSubmit={handleSaveNote}>
                 <div className='mb-2'>
