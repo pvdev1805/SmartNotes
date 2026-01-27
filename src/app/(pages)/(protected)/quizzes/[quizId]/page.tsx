@@ -84,76 +84,79 @@ const QuizPage = () => {
 
   return (
     <>
-      {/* Back to previous */}
-      <div className='flex items-center justify-between mb-4'>
-        <Button variant={'outline'} onClick={nav.toQuizList} className='flex items-center'>
-          <CircleChevronLeft className='w-5 h-5' /> Back to Quizzes
-        </Button>
-      </div>
+      <div className='min-h-screen bg-gray-50 px-4 py-4 overflow-hidden'>
+        {/* Back to previous */}
+        <div className='flex items-center justify-between mb-4'>
+          <Button variant={'outline'} onClick={nav.toQuizList} className='flex items-center'>
+            <CircleChevronLeft className='w-5 h-5' /> Back to Quizzes
+          </Button>
+        </div>
 
-      <div className='min-h-screen flex flex-col items-center'>
-        <Card className='w-full shadow-lg rounded-xl p-6 bg-white pb-8'>
-          <CardContent>
-            <div className='flex items-center gap-3 mb-4'>
-              <h2 className='text-2xl font-bold text-gray-900'>Quiz: {quiz?.title}</h2>
-            </div>
-            <div className='mb-6 flex flex-col gap-4'>
-              <div className='flex items-center gap-2'>
-                <FileText className='w-5 h-5 text-gray-500' />
-                <span className='text-gray-800'>Total questions: {quiz?.questions?.length}</span>
+        <div className='min-h-screen flex flex-col items-center'>
+          <Card className='w-full shadow-lg rounded-xl p-6 bg-white pb-8 grid grid-cols-3 gap-4'>
+            <CardContent className='col-span-1'>
+              <div className='flex items-center gap-3 mb-4'>
+                <h2 className='text-2xl font-bold text-gray-900'>Quiz: {quiz?.title}</h2>
               </div>
-              <div className='flex items-center gap-2'>
-                <BookOpen className='w-5 h-5 text-gray-500' />
-                <span className='text-gray-800'>Total attempts: {attempts.length}</span>
+              <div className='mb-6 flex flex-col gap-4'>
+                <div className='flex items-center gap-2'>
+                  <FileText className='w-5 h-5 text-gray-500' />
+                  <span className='text-gray-800'>Total questions: {quiz?.questions?.length}</span>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <BookOpen className='w-5 h-5 text-gray-500' />
+                  <span className='text-gray-800'>Total attempts: {attempts.length}</span>
+                </div>
               </div>
-            </div>
-            <div className='flex gap-4 mt-8'>
-              <Button onClick={handleStartNewAttempt}>Start new attempt</Button>
-            </div>
-          </CardContent>
+              <div className='flex gap-4 mt-8'>
+                <Button onClick={handleStartNewAttempt}>Start new attempt</Button>
+              </div>
+            </CardContent>
 
+            {/* Attempts Grid */}
+            <CardContent className='col-span-2'>
+              <AnimatedSection delay={0.2}>
+                {loading ? (
+                  <p className="text-gray-500">Loading attempts...</p>
+                ) : !error && attempts.length === 0 ? (
+                  <div className='text-center text-gray-500 py-16'>
+                    <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
+                    <p className='text-lg'>No attempts found. Let's start a new attempt!</p>
+                  </div>
+                ) : (
+                  <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                    {attempts.map((attempt) => (
+                      <AttemptCard
+                        quizId={attempt.quizId}
+                        quizTitle={quiz?.title || ""}
+                        key={attempt.id}
+                        id={attempt.id}
+                        score={attempt.score}
+                        totalQuestions={attempt.totalQuestion}
+                        attemptAt={new Date(attempt.attemptAt)}
+                        onFinishDelete={() => handleDeleted(attempt.id)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </AnimatedSection>
 
-          {/* Attempts Grid */}
-          <AnimatedSection delay={0.2}>
-            {loading ? (
-              <p className="text-gray-500">Loading attempts...</p>
-            ) : !error && attempts.length === 0 ? (
-              <div className='text-center text-gray-500 py-16'>
-                <Notebook className='w-12 h-12 mx-auto mb-4 text-gray-300' />
-                <p className='text-lg'>No attempts found. Let's start a new attempt!</p>
-              </div>
-            ) : (
-              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-                {attempts.map((attempt) => (
-                  <AttemptCard
-                    quizId={attempt.quizId}
-                    quizTitle={quiz?.title || ""}
-                    key={attempt.id}
-                    id={attempt.id}
-                    score={attempt.score}
-                    totalQuestions={attempt.totalQuestion}
-                    attemptAt={new Date(attempt.attemptAt)}
-                    onFinishDelete={() => handleDeleted(attempt.id)}
+              {/* Pagination */}
+              {page.totalPages > 1 && (
+                <FadeInSection>
+                  <Pagination
+                    total={page.totalElements}
+                    pageSize={page.pageSize}
+                    totalPages={page.totalPages}
+                    currentPage={page.currentPage}
+                    onPageChange={handlePageChange}
                   />
-                ))}
-              </div>
-            )}
-          </AnimatedSection>
-
-          {/* Pagination */}
-          {page.totalPages > 1 && (
-            <FadeInSection>
-              <Pagination
-                total={page.totalElements}
-                pageSize={page.pageSize}
-                totalPages={page.totalPages}
-                currentPage={page.currentPage}
-                onPageChange={handlePageChange}
-              />
-            </FadeInSection>
-          )}
-          {/* End - Pagination */}
-        </Card>
+                </FadeInSection>
+              )}
+              {/* End - Pagination */}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </>
   )

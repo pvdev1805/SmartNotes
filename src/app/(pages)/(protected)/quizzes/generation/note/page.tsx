@@ -17,7 +17,7 @@ const NoteSelectionPage = () => {
   const nav = useNav()
 
   const [notes, setNotes] = useState<Note[]>([])
-  const [page, setPage] = useState<PageInfo>({ currentPage: 1, pageSize: 3, totalPages: 0, totalElements: 0 })
+  const [page, setPage] = useState<PageInfo>({ currentPage: 1, pageSize: 12, totalPages: 0, totalElements: 0 })
 
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
