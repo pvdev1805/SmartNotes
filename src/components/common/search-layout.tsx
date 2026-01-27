@@ -3,7 +3,7 @@ import FilterPopover, { FilterCriterion } from '@/components/common/popover/filt
 import SortPopover, { SortCriterion } from '@/components/common/popover/sort-popover'
 import { Button } from '@/components/ui/button'
 import AnimatedSection from '@/components/landing/animated-section'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import useQuery from '@/hooks/use-query'
 
 interface SearchLayoutProps {
@@ -16,15 +16,28 @@ const SearchLayout = ({ filterCriteria, sortCriteria } : SearchLayoutProps) => {
   const [resetTrigger, setResetTrigger] = useState(false)
   const { setQuery, removeQuery, clearQuery } = useQuery()
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (search.trim() !== "") {
+        setQuery("keyword", search)
+      } else {
+        removeQuery("keyword")
+      }
+    }, 500)
+
+    return () => clearTimeout(handler)
+  }, [search])
+
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let keyword = e.target.value
-    if (keyword.trim() != '') {
-      setSearch(keyword)
-      setQuery('keyword', keyword)
-    } else {
-      setSearch('')
-      removeQuery('keyword')
-    }
+    setSearch(e.target.value)
+    // let keyword = e.target.value
+    // if (keyword.trim() != '') {
+    //   setSearch(keyword)
+    //   setQuery('keyword', keyword)
+    // } else {
+    //   setSearch('')
+    //   removeQuery('keyword')
+    // }
   }
 
   const handleFilterInputChange = (filters: Record<string, string>) => {
