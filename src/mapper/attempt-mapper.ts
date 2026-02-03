@@ -1,6 +1,6 @@
-import { AttemptDetail } from '@/types/quiz-attempt'
+import { QuizAttemptDetail } from '@/types/quiz-attempt.type'
 
-export const toAttemptQuestion = (attempts: AttemptDetail[]) => {
+export const toAttemptQuestion = (attempts: QuizAttemptDetail[]) => {
   return attempts.map((detail) => ({
     id: detail.id,
     text: detail.questionText,

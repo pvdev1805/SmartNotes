@@ -7,8 +7,9 @@ import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { getAttemptAnswer } from '@/services/quiz.service'
 import { useNav } from '@/hooks/use-nav'
-import { AttemptQuestion, AttemptResult } from '@/types/quesiton.type'
+import { AttemptQuestion, AttemptResult } from '@/types/quiz-attempt.type'
 import { toAttemptQuestion } from '@/mapper/attempt-mapper'
+import ErrorBlock from '@/components/common/error-block'
 
 const QuizResultPage = () => {
   const nav = useNav()
@@ -60,6 +61,9 @@ const QuizResultPage = () => {
         <Card className='w-full max-w-2xl shadow-lg rounded-xl p-8 bg-white'>
           <CardContent>
             <h2 className='text-2xl font-bold text-gray-900 mb-2'>Quiz Results</h2>
+
+            <ErrorBlock errorMessage={error} />
+
             <div className='flex flex-col items-center mb-6'>
               <div className='text-4xl font-bold text-blue-700 mb-2'>
                 {result.score} / {result.total}

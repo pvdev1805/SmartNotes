@@ -1,5 +1,6 @@
 import { Trash } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { createPortal } from 'react-dom'
 
 interface ConfirmationModalProps {
   type: string
@@ -11,9 +12,9 @@ interface ConfirmationModalProps {
 }
 
 const DeleteConfirmationModal = ({ type, id, title, isDeleting, onCancel, onConfirm } : ConfirmationModalProps) => {
-  return (
+  return createPortal(
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center  backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
         <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 animate-in zoom-in-95 duration-200">
           {/* Header */}
           <div className="p-6 border-b border-gray-200">
@@ -66,7 +67,8 @@ const DeleteConfirmationModal = ({ type, id, title, isDeleting, onCancel, onConf
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   )
 }
 

@@ -28,8 +28,6 @@ const AttemptCard = ({ quizId, quizTitle, id, score, totalQuestions, attemptAt, 
   const [deleteConfirmationOpen, setDeleteConfirmationOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const MAX_TAGS_DISPLAY = 2
-
   // ------ Handle action bar on each attempt cards ------ //
   const handleClickOutside = (event: MouseEvent | globalThis.MouseEvent) => {
     if (

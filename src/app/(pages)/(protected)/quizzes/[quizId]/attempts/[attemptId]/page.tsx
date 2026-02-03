@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { QuizAttempt } from '@/types/quiz-attempt'
+import { QuizAttempt } from '@/types/quiz-attempt.type'
 import { finishAttempt, getQuizAttempt, startQuizAttempt, updateAttemptProgress } from '@/services/quiz.service'
 import { useParams } from 'next/navigation'
 import { useNav } from '@/hooks/use-nav'
-import { AttemptQuestion } from '@/types/quesiton.type'
+import { AttemptQuestion } from '@/types/quiz-attempt.type'
 import { toAttemptQuestion } from '@/mapper/attempt-mapper'
+import ErrorBlock from '@/components/common/error-block'
 
 const QuizQuestionPage = () => {
   const nav = useNav()
@@ -191,6 +192,7 @@ const QuizQuestionPage = () => {
   return (
     <div className='min-h-screen flex flex-col items-center bg-gray-50 px-2 py-8'>
       <Card className='w-full max-w-xl shadow-lg rounded-xl p-8 bg-white'>
+        <ErrorBlock errorMessage={error} />
         <CardContent>
           {/* Progress */}
           <div className='mb-4 flex items-center justify-between'>

@@ -4,12 +4,12 @@ import { getPagination } from '@/utils/pagination'
 interface PaginationProps {
   total: number
   pageSize: number
+  totalPages: number
   currentPage: number
   onPageChange: (page: number) => void
 }
 
-const Pagination = ({ total, pageSize, currentPage, onPageChange }: PaginationProps) => {
-  const totalPages = Math.ceil(total / pageSize)
+const Pagination = ({ total, pageSize, totalPages, currentPage, onPageChange }: PaginationProps) => {
   const pages = getPagination(currentPage, totalPages)
 
   return (

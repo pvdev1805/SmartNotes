@@ -2,16 +2,17 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { CircleChevronLeft, Notebook, Save } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { ChangeEvent, FormEvent, useState } from 'react'
 
 import { createNote } from '@/services/note.service'
-import { Note } from '@/types/note.type'
 import AnimatedSection from '@/components/landing/animated-section'
 import AutoResizeTextarea from '@/components/notes/auto-resize-textarea'
+import { useNav } from '@/hooks/use-nav'
+import ErrorBlock from '@/components/common/error-block'
 
 const NewNotePage = () => {
-  const router = useRouter()
+  const nav = useNav()
+
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   // const [tags, setTags] = useState<string[]>([])
@@ -19,6 +20,7 @@ const NewNotePage = () => {
 
   const [error, setError] = useState('')
 
+  // ------ Handle content changes ------ //
   const handleChangeTitle = (event: ChangeEvent<HTMLInputElement>) => {
     const newTitle = event.target.value
     setTitle(newTitle)
@@ -34,6 +36,7 @@ const NewNotePage = () => {
   //   setTagsInput(newTagsInput)
   // }
 
+  // ------ Handle note creation ------ //
   const handleSaveNote = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError('')
@@ -44,29 +47,30 @@ const NewNotePage = () => {
     //   .filter((tag) => tag)
     //
     // setTags(updatedTags)
-    const newNote = {
-      title: title,
-      content: content
-    } as Note
 
     try {
-      const createdNote = await createNote(newNote)
+      const createdNote = await createNote({
+        title: title,
+        content: content
+      })
 
       // Redirect back to notes list
       const newId = createdNote?.id
-      if (newId) router.push(`/notes/${newId}`)
+      if (newId) nav.toNote(newId)
     } catch (error: any) {
-      console.log(error.message)
       setError(error.message)
     }
   }
 
-  const handleBack = () => {
-    router.back()
-  }
-
   return (
     <>
+      {/* Back to previous */}
+      <div className='flex items-center justify-between mb-4 '>
+        <Button variant={'outline'} onClick={nav.toNoteList} className='flex items-center'>
+          <CircleChevronLeft className='w-5 h-5' /> Back to Notes
+        </Button>
+      </div>
+
       <div className='min-h-screen flex flex-col items-center bg-gray-50 px-2 py-4 rounded-lg'>
         <Card className='w-full max-w-3xl shadow-lg rounded-xl p-6 bg-white'>
           <CardContent>
@@ -75,29 +79,14 @@ const NewNotePage = () => {
                 <Notebook className='w-7 h-7 text-blue-600' />
                 New Note
               </h2>
-
-              <Button variant={'outline'} className='flex items-center' onClick={handleBack}>
-                <CircleChevronLeft className='w-5 h-5' /> Back
-              </Button>
             </div>
 
             {/* Error Message or Input Form */}
+            <div className='mb-4'>
+              <p className='text-sm text-gray-700'>Create a new note by filling out the details below.</p>
+            </div>
             {error != '' ? (
-              <>
-                <div className='mb-4'>
-                  <p className='text-sm text-gray-700'>Create a new note by filling out the details below.</p>
-                </div>
-                <AnimatedSection delay={0.2}>
-                  <div className='bg-red-50 border border-red-200 rounded-lg p-6 mb-6'>
-                    <div className='flex items-start gap-3'>
-                      <div className='flex-1'>
-                        <h3 className='text-red-900 font-semibold mb-1'>Error Creating Notes</h3>
-                        <p className='text-red-700 mb-4'>{error}</p>
-                      </div>
-                    </div>
-                  </div>
-                </AnimatedSection>
-              </>
+              <ErrorBlock errorMessage={error} />
             ) : (
               <form onSubmit={handleSaveNote}>
                 <div className='mb-2'>

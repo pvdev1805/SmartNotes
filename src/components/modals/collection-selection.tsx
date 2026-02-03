@@ -1,6 +1,7 @@
 import { FolderPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface Collection {
   id: number
@@ -12,7 +13,10 @@ interface AddToCollectionModalProps {
   objTitle: string // object's title
   orgCollectionId: number // object's origin collection's id
   collections: Collection[] // available choices
-  isAdding: boolean
+  pageNumber: number,
+  totalPages: number,
+  isAdding: boolean,
+  onPageChange: (pageNumber: number) => void,
   onCancel: () => void // should trigger hiding modal in parent component
   onConfirm: (collectionId: number) => void // should trigger next action in parent component
 }
@@ -22,7 +26,10 @@ const AddToCollectionModal = ({
                                 objTitle,
                                 orgCollectionId,
                                 collections,
+                                pageNumber,
+                                totalPages,
                                 isAdding,
+                                onPageChange,
                                 onCancel,
                                 onConfirm
                               }: AddToCollectionModalProps) => {
@@ -34,9 +41,9 @@ const AddToCollectionModal = ({
     }
   }
 
-  return (
+  return createPortal(
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
         <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 animate-in zoom-in-95 duration-200">
           {/* Header */}
           <div className="p-6 border-b border-gray-200">
@@ -86,6 +93,24 @@ const AddToCollectionModal = ({
                 ))
               )}
             </div>
+
+            <div className="flex justify-between mt-4">
+              <Button
+                variant="outline"
+                disabled={pageNumber === 1}
+                onClick={() => onPageChange(pageNumber - 1)}
+              >
+                Previous
+              </Button>
+
+              <Button
+                variant="outline"
+                disabled={pageNumber === totalPages}
+                onClick={() => onPageChange(pageNumber + 1)}
+              >
+                Next
+              </Button>
+            </div>
           </div>
 
           {/* Footer */}
@@ -118,7 +143,8 @@ const AddToCollectionModal = ({
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   )
 }
 

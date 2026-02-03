@@ -138,13 +138,11 @@ const QuizSetCard = ({ id, originType, title, onFinishRename, onFinishDelete }: 
                   `}
           >
             <div className='flex items-start justify-between'>
-              <div className='flex-1'>
-                <div className='flex items-center gap-2 mb-1'>
-                  <Folder className='text-gray-400' />
-                  <h3 className='font-semibold text-sm text-gray-900 truncate'>
-                    {originType === "DEFAULT" ? "DEFAULT" : title}
-                  </h3>
-                </div>
+              <div className='flex items-center gap-2 mb-1 min-w-0 pr-5'>
+                <Folder className='text-gray-400' />
+                <h3 className='font-semibold text-sm text-gray-900 truncate'>
+                  {originType === "DEFAULT" ? "DEFAULT" : title}
+                </h3>
               </div>
             </div>
 
@@ -216,7 +214,7 @@ const QuizSetCard = ({ id, originType, title, onFinishRename, onFinishDelete }: 
         {/* Confirmation Modal */}
         {deleteConfirmationOpen &&
           <DeleteConfirmationModal
-            type="quiz"
+            type="quiz set"
             id={id}
             title={title}
             isDeleting={isDeleting}

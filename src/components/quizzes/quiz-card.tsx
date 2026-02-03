@@ -11,6 +11,7 @@ import DeleteConfirmationModal from '@/components/modals/delete-confirmation'
 import CollectionSelection from '@/components/modals/collection-selection'
 import { getAllQuizSets } from '@/services/quiz-set.service'
 import { QuizCollection } from '@/types/quiz-set.type'
+import { PageInfo } from '@/types/util.type'
 
 interface QuizCardProps {
   id: number
@@ -18,11 +19,12 @@ interface QuizCardProps {
   quizSetId: number
   totalQuestions?: number
   createdAt: Date
+  updatedAt: Date
   onFinishCollectionChange: () => void
   onFinishDelete: () => void // callback to remove deleted note
 }
 
-const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, onFinishCollectionChange, onFinishDelete }: QuizCardProps) => {
+const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, updatedAt, onFinishCollectionChange, onFinishDelete }: QuizCardProps) => {
   const [actionsOpen, setActionsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const cancelButtonRef = useRef<HTMLButtonElement>(null)
@@ -34,8 +36,7 @@ const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, onFinishCol
   const [collectionSelectionOpen, setCollectionSelectionOpen] = useState(false)
   const [isAdding, setIsAdding] = useState(false)
   const [collection, setCollection] = useState<QuizCollection[]>([])
-
-  const MAX_TAGS_DISPLAY = 2
+  const [collectionPage, setCollectionPage] = useState<PageInfo>({ currentPage: 1, pageSize: 4, totalPages: 0, totalElements: 0 })
 
   // ------ Handle action bar on each card ------ //
   const handleClickOutside = (event: MouseEvent | globalThis.MouseEvent) => {
@@ -73,15 +74,25 @@ const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, onFinishCol
     event.stopPropagation()
     setActionsOpen(false)
 
-    const result = await getAllQuizSets()
-    const mappedCollection: QuizCollection[] = result.map((quizSet) => ({
+    const result = await getAllQuizSets(collectionPage.currentPage, collectionPage.pageSize)
+    const mappedCollection: QuizCollection[] = result.pageData.map((quizSet) => ({
       id: quizSet.id,
       title: quizSet.originType === "DEFAULT" ? "DEFAULT" : quizSet.title
     }))
     setCollection(mappedCollection)
 
     setCollectionSelectionOpen(true)
-    console.log('Add to collection action triggered for quiz:', id)
+  }
+
+  const handleCollectionPageChange = async (pageNumber: number) => {
+    setCollectionPage((prevState) => ({ ...prevState, currentPage: pageNumber }))
+
+    const result = await getAllQuizSets(pageNumber, collectionPage.pageSize)
+    const mappedCollection: QuizCollection[] = result.pageData.map((quizSet) => ({
+      id: quizSet.id,
+      title: quizSet.originType === "DEFAULT" ? "DEFAULT" : quizSet.title
+    }))
+    setCollection(mappedCollection)
   }
 
   const handleConfirmSelection = async (newQuizSetId: number) => {
@@ -156,7 +167,8 @@ const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, onFinishCol
                 <h3 className='font-semibold text-foreground truncate max-w-[200px] sm:max-w-[220px]'>{title}</h3>
               </div>
 
-              <p className='mb-4 text-sm text-muted-foreground lg:min-h-10 line-clamp-2'>Total: {totalQuestions} questions</p>
+              {totalQuestions &&
+                <p className='mb-4 text-sm text-muted-foreground lg:min-h-10 line-clamp-2'>Total: {totalQuestions} questions</p>}
               <TimeAgo date={createdAt} className='mb-2' />
             </CardContent>
           </Link>
@@ -220,7 +232,7 @@ const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, onFinishCol
             isDeleting={isDeleting}
             onCancel={() => setDeleteConfirmationOpen(false)}
             onConfirm={handleConfirmDelete}
-          ></DeleteConfirmationModal>
+          />
         }
         {/* End - Confirmation Modal */}
 
@@ -230,8 +242,11 @@ const QuizCard = ({ id, title, quizSetId, totalQuestions, createdAt, onFinishCol
             objId={id}
             objTitle={title}
             orgCollectionId={quizSetId}
+            pageNumber={collectionPage.currentPage}
+            totalPages={collectionPage.totalPages}
             isAdding={isAdding}
             collections={collection}
+            onPageChange={handleCollectionPageChange}
             onCancel={() => setCollectionSelectionOpen(false)}
             onConfirm={handleConfirmSelection}
           />
